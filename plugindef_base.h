@@ -22,15 +22,58 @@ namespace PlgDef{
         Service_LogPort
     };
 
+    /**
+    @brief 所有插件的共同基类
+    */
     class I_PluginBase{
     public:
-        virtual ~I_PluginBase();
+        I_PluginBase(){}
+        virtual ~I_PluginBase(){}
 
-        virtual int pluginMark() = 0;
-        virtual int upStreamMark() = 0;
+        /**
+         * @brief 插件注册名称，不可重复
+         * @return 插件注册名称
+         */
+        virtual QString* registName() = 0;
 
-        virtual QMenu getCustomMenu() = 0;
+        /**
+         * @brief 获取插件类别
+         * @return 插件类别标志
+         */
+        virtual PlgDef::PluginType pluginMark() = 0;
+
+        /**
+         * @brief 上游插件的类别
+         * @return 插件类别标志
+         */
+        virtual PlgDef::PluginType upStreamMark() = 0;
+
+        /**
+         * @brief 获取插件自定义的菜单
+         * @return 插件菜单
+         */
+        virtual QMenu* getCustomMenu() = 0;
+
+        /**
+         * @brief 插件自身保存操作
+         */
         virtual void saveOperation() = 0;
+    };
+
+    class I_PluginEvent {
+    public:
+        virtual ~I_PluginEvent();
+
+        virtual I_PluginBase* getSource()=0;
+        virtual QString* getMsg()=0;
+    };
+
+    class I_FileSymbo{
+    public:
+        virtual ~I_FileSymbo();
+
+        virtual QString* getFilePath() = 0;
+        virtual QString* getSimpleFileName() = 0;
     };
 }
 

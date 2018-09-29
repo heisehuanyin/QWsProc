@@ -32,8 +32,11 @@ SOURCES += \
 HEADERS += \
     wscore.h \
     SingalView.h \
-    plugindef.h \
-    plugindef_base.h
+    plugindef_base.h \
+    windowdef.h \
+    contentviewdef.h \
+    menubardef.h \
+    configport.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
