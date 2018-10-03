@@ -77,9 +77,25 @@ namespace PlgDef{
     };
 
     class I_PluginException:std::exception{
+    private:
+        QString *const reason;
+
+
     public:
-        I_PluginException();
+        I_PluginException(QString &reason):
+            reason(&reason)
+        {
+
+        }
         virtual ~I_PluginException();
+
+
+
+        // exception interface
+    public:
+        virtual const char *what(){
+
+        }
     };
 }
 
