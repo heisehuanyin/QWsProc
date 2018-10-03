@@ -1,8 +1,7 @@
-#ifndef MENUBARDEF_H
-#define MENUBARDEF_H
+#ifndef DEFMENUBAR_H
+#define DEFMENUBAR_H
 
-#include "plugindef_base.h"
-#include "wscore.h"
+#include "def_plugin_base.h"
 
 #include <QMenu>
 
@@ -21,4 +20,4 @@ namespace PlgDef{
 
 }
 
-#endif // PLUGINDEF_H
+#endif // DEFMENUBAR_H

@@ -1,23 +1,155 @@
 #ifndef WSCORE_H
 #define WSCORE_H
 
-#include "plugindef_base.h"
+#include "def_plugin_base.h"
+
+namespace PlgDef {
+    namespace ConfigPort {
+        class I_ConfigPort;
+    }
+    namespace LogPort {
+        class I_LogPort;
+    }
+    namespace Window {
+        class I_Window;
+    }
+}
+
+
 
 namespace Core {
-    class PluginManager{
+    class WsCore;
+
+    class PluginManager final{
+    public:
+        PluginManager(WsCore* core);
+        ~PluginManager();
+
+        /**
+         * @brief 注册插件实例生成器
+         * @param p 工厂类
+         */
+        void factory_RegisterPlugin(PlgDef::I_PluginBase *p);
+
+        /**
+         * @brief 全局保存操作
+         */
+        void operate_SaveOperation();
+        void operate_BuildChannel(QString *const cStr, QString* const cId);
+
+        /**
+         * @brief 保存特定通道所有插件内容
+         * @param c 通道实例
+         */
+        void channel_SaveChannel(QList<PlgDef::I_PluginBase *> * c);
+
+        /**
+         * @brief 移除特定通道
+         * @param cId 通道id
+         */
+        void channel_CloseChannelWithoutSave(QString *const cId);
+
+        /**
+         * @brief 通过插件实例，查询指定插件通道id
+         * @param pExample 插件实例
+         * @return 通道id，一般是指向URL
+         */
+        const QString * channel_getChannelId(PlgDef::I_PluginBase *pExample);
+
+        /**
+         * @brief 通过通道id获取整条通道
+         * @param cId 通道id
+         * @return 插件实例通道
+         */
+        QList<PlgDef::I_PluginBase *> * channel_GetExistsChannel(QString *const cId);
+
+
+        //Special Components
+        /**
+         * @brief 获取一个Configport实例，每次程序启动，只保留最后装载的一种Configport插件
+         * @param fPath 配置文件路径
+         * @return Configport实例
+         */
+        PlgDef::ConfigPort::I_ConfigPort *instance_GetConfigport(QString *const fPath);
+
+        /**
+         * @brief 获取一个Logport实例，每次程序启动，只保留最后装载的一种Logport插件
+         * @param fPath Log文件路径
+         * @return Logport插件实例
+         */
+        PlgDef::LogPort::I_LogPort *instance_GetLogport(QString *const fPath);
+
+        //UI Components
+        /**
+         * @brief 获取配置项设定的窗口实例一个
+         * @param gId GroupId
+         * @return 实例
+         */
+        PlgDef::I_PluginBase * instance_GetWindowInstance(QString *const gId);
+        PlgDef::I_PluginBase * instance_GetMenuBarInstance(QString *const gId);
+
+        //Query Methods
+        /**
+         * @brief 通过指定typeMark，查询所有同种插件列表
+         * @param typeMark 插件类别码
+         * @return 信息组合
+         */
+        QList<QPair<QString, PlgDef::PluginType>> * service_QueryFactoryList(PlgDef::PluginType typeMark);
+
+        /**
+         * @brief 通过指定插件注册名，查询所有同种插件列表
+         * @param pRegistName 插件注册名
+         * @return 信息组合
+         */
+        QList<QPair<QString, PlgDef::PluginType>> * service_QueryFactoryList(QString *const pRegistName);
+
+    private:
+        QHash<QString, PlgDef::I_PluginBase *> *const factories;
+        QList<PlgDef::I_PluginBase *> *const configunits;
+        QHash<QString, QList<PlgDef::I_PluginBase *> *> *const instances;
+        WsCore *const core;
+        QString *logportName;
+        QString *configportName;
+        QList<QPair<QString, PlgDef::PluginType>> *const list;
+
+        /**
+         * @brief 获取已经存在的插件工厂
+         * @param key 插件注册名
+         * @return 插件实例生成器
+         */
+        PlgDef::I_PluginBase * factory_GetExistsFactory(QString *const key);
+
+        /**
+         * @brief 输入指定配置条目和默认配置值，获取插件实例生成器。若配置文件中条目为空，写入默认值
+         * @param key 配置文件中配置条目
+         * @param defaultVal 默认配置值
+         * @return 插件实例
+         */
+        PlgDef::I_PluginBase * factory_GetExistsFactoryWithCfg(QString *const key, QString *const defaultVal);
+
+        /**
+         * @brief 注册插件实例到Manager
+         * @param key 注册键名
+         * @param p 插件实例
+         */
+        void instance_RegisterPluginInstance(QString *const key, PlgDef::I_PluginBase *const p);
+
 
     };
 
-    class WsCore{
+
+
+
+    class WsCore final{
     public:
-        WsCore(){}
-        ~WsCore(){}
+        WsCore();
+        ~WsCore();
 
         /**
          * @brief 获取插件管理器
          * @return 插件管理器实例
          */
-        PluginManager service_getManager();
+        PluginManager* service_getManager();
 
         /**
          * @brief 注册插件工厂便捷接口
@@ -27,14 +159,52 @@ namespace Core {
 
         /**
          * @brief 刷新指定窗口实例上的menubar
-         * @param window 指定窗口实例
+         * @param win 指定窗口实例
          */
-        void service_RefreshMenuBar(PlgDef::I_PluginBase *window);
+        void service_RefreshMenuBar(PlgDef::Window::I_Window *win);
 
         /**
          * @brief 默认全平台保存操作
          */
         void service_SaveOperation();
+
+        /**
+         * @brief 打开特定文件，如果通道中插件有ContentView类型，会自动加载到本窗口上
+         * @param fileIndicate 文件指代符
+         * @param win 发出请求的窗口
+         */
+        void service_OpenFile(PlgDef::I_FileSymbo *fileIndicate, PlgDef::I_PluginBase *win);
+
+        /**
+         * @brief 获取默认的LogPort插件实例
+         * @return 实例
+         */
+        PlgDef::LogPort::I_LogPort* instance_GetDefaultLogPort();
+
+        /**
+         * @brief 获取默认的ConfigPort插件实例
+         * @return 实例
+         */
+        PlgDef::ConfigPort::I_ConfigPort* instance_GetMainConfigPort();
+
+        /**
+         * @brief 打开静默模式，可以通过命令行和宏文件操纵软件
+         */
+        void service_OpenSilentModel();
+
+        /**
+         * @brief 打开图形模式，所有操作可以通过图形界面进行操作
+         * @param groupId 插件实例注册id
+         */
+        void service_OpenGraphicsModel(QString* groupId);
+
+    private:
+        void operate_LoadAllPlugins();
+        void operate_InitDefaultPlugins();
+
+        QString *const DefaultLogpath;
+        QString *const DefaultConfigpath;
+        PluginManager *const manager;
     };
 }
 

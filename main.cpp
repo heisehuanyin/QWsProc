@@ -1,46 +1,62 @@
-#include "SingalView.h"
 #include <QApplication>
-#include "wscore.h"
 #include <iostream>
+
+#include "wscore.h"
 
 using Core::WsCore;
 
-void openCtlModel(WsCore *core);
-void openGraphicsModel(WsCore *core);
-void openCustomFile(WsCore *core);
-void runMacroSourceCode(WsCore *core);
-void printInfo(WsCore *core);
-
-
+void __printPluginList(PlgDef::PluginType ,QList<QPair<QString, PlgDef::PluginType>> *const);
 
 int main(int argc, char *argv[])
 {
-    std::cout<<"参数个数:" <<argc <<std::endl;
-    for(int i=0;i<argc;++i){
-        std::cout<<"<" <<i <<">" <<argv[i] <<std::endl;
-    }
-    std::cout<<"========================================"<<std::endl;
+    QApplication a(argc, argv);
 
-    if(argc == 2 && QString(argv[1]) == QString("-help")){
-        std::cout<<"命令使用形式：exe [operation] [filepath]"<<std::endl;
-        std::cout<<"operation:"<<std::endl;
-        std::cout<<"    1. -w 开启图形界面，无此选项则开启后台静默模式；"<<std::endl;
-        std::cout<<"    2. -s 打开指定路径文件供操作，如果开启的是图形界面，内容会显示在图形界面上；"<<std::endl;
-        std::cout<<"    3. -r 运行文件。先决条件采用“-s”打开文件；"<<std::endl;
-        std::cout<<"filepath:"<<std::endl;
-        std::cout<<"    * 文件路径，当采用“-s”标志打开软件，本选项不可缺少；"<<std::endl;
+    WsCore *app = new WsCore();
+
+    if(argc == 2 && QString("-print") == argv[1]){
+        app->service_OpenSilentModel();
+        auto m = app->service_getManager();
+        auto x = m->service_QueryFactoryList(PlgDef::IO_NoUpStream);
+        __printPluginList(PlgDef::IO_NoUpStream,x);
+        x = m->service_QueryFactoryList(PlgDef::IO_PluginSymbo);
+        __printPluginList(PlgDef::IO_PluginSymbo,x);
+        x = m->service_QueryFactoryList(PlgDef::IO_StyleModel);
+        __printPluginList(PlgDef::IO_StyleModel,x);
+        x = m->service_QueryFactoryList(PlgDef::IO_TableModel);
+        __printPluginList(PlgDef::IO_TableModel,x);
+        x = m->service_QueryFactoryList(PlgDef::IO_TextModel);
+        __printPluginList(PlgDef::IO_TextModel,x);
+        x = m->service_QueryFactoryList(PlgDef::IO_TreeModel);
+        __printPluginList(PlgDef::IO_TreeModel,x);
+        x = m->service_QueryFactoryList(PlgDef::Service_ConfigPort);
+        __printPluginList(PlgDef::Service_ConfigPort,x);
+        x = m->service_QueryFactoryList(PlgDef::Service_LogPort);
+        __printPluginList(PlgDef::Service_LogPort,x);
+        x = m->service_QueryFactoryList(PlgDef::UI_ContentView);
+        __printPluginList(PlgDef::UI_ContentView,x);
+        x = m->service_QueryFactoryList(PlgDef::UI_MenuBar);
+        __printPluginList(PlgDef::UI_MenuBar,x);
+        x = m->service_QueryFactoryList(PlgDef::UI_StateBar);
+        __printPluginList(PlgDef::UI_StateBar,x);
+        x = m->service_QueryFactoryList(PlgDef::UI_ToolBar);
+        __printPluginList(PlgDef::UI_ToolBar,x);
+        x = m->service_QueryFactoryList(PlgDef::UI_Window);
+        __printPluginList(PlgDef::UI_Window,x);
 
         return 0;
     }
 
-    WsCore *core = new WsCore();
+    app->service_OpenGraphicsModel(new QString("Default"));
 
-    /*
+    return a.exec();
+}
 
-
-    QApplication a(argc, argv);
-
-    return a.exec();*/
-
-    return 0;
+void __printPluginList(PlgDef::PluginType type ,QList<QPair<QString, PlgDef::PluginType>> *const list){
+    std::cout << "TypeMark:"<<type << std::endl;
+    for(auto itor = list->constBegin();
+        itor != list->constEnd();
+        ++itor){
+        auto pair = *itor;
+        std::cout<<"    "<<pair.first.toStdString() <<"    Upstream->" <<pair.second<<std::endl;
+    }
 }

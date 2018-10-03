@@ -26,19 +26,26 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-    wscore.cpp \
-    SingalView.cpp
+    SingalView.cpp \
+    DefaultLogPort.cpp \
+    WsCore.cpp
 
 HEADERS += \
-    wscore.h \
     SingalView.h \
-    plugindef_base.h \
-    windowdef.h \
-    contentviewdef.h \
-    menubardef.h \
-    configport.h
+    DefaultLogPort.h \
+    WsCore.h \
+    def_configport.h \
+    def_contentview.h \
+    def_logport.h \
+    def_menubar.h \
+    def_plugin_base.h \
+    def_window.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    CPP编程规范.md \
+    README.md

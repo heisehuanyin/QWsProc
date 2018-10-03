@@ -1,7 +1,7 @@
 #ifndef SINGALVIEW_H
 #define SINGALVIEW_H
 
-#include "windowdef.h"
+#include "def_window.h"
 
 #include <QMainWindow>
 
@@ -12,11 +12,12 @@ namespace PlgDef {
         class SingalView : public PlgDef::Window::I_Window
         {
         private:
-            QString *plgName;
             QString *gid;
-            Core::WsCore* core;
-            QMainWindow* window;
-            PlgDef::ContentView::I_ContentView* centralView;
+            Core::WsCore * core;
+            PlgDef::ContentView::I_ContentView * centralView;
+            QString *const plgName;
+            QMainWindow *const window;
+            QList<PlgDef::ContentView::I_ContentView *> *const list;
 
         public:
             SingalView();
@@ -38,7 +39,7 @@ namespace PlgDef {
             void placeView(QString *viewTitle, PlgDef::ContentView::I_ContentView *comp);
             void closeContentView(PlgDef::ContentView::I_ContentView *comp);
             void service_RefreshMenuBar(PlgDef::MenuBar::I_MenuBar *bar);
-            void getActivedView(QList<PlgDef::ContentView::I_ContentView*> *views);
+            QList<PlgDef::ContentView::I_ContentView *> * getActivedView();
 
         };
 

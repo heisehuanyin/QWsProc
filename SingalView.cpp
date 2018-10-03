@@ -4,10 +4,12 @@ using namespace PlgDef::Window;
 namespace MBar = PlgDef::MenuBar;
 namespace CView = PlgDef::ContentView;
 
-SingalView::SingalView():I_Window ()
+SingalView::SingalView():I_Window (),
+    plgName(new QString("SingleView")),
+    window(new QMainWindow(nullptr)),
+    list(new QList<PlgDef::ContentView::I_ContentView *>())
 {
-    this->window = new QMainWindow(nullptr);
-    *(this->plgName) = "SingleView";
+
 }
 
 SingalView::~SingalView()
@@ -82,9 +84,11 @@ void SingalView::service_RefreshMenuBar(MBar::I_MenuBar *bar)
     //TODO
 }
 
-void SingalView::getActivedView(QList<CView::I_ContentView*> *views)
+QList<CView::I_ContentView *> * SingalView::getActivedView()
 {
-    views->append(this->centralView);
+    this->list->clear();
+    this->list->append(this->centralView);
+    return this->list;
 }
 
 

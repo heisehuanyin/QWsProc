@@ -1,9 +1,9 @@
-#ifndef WINDOWDEF_H
-#define WINDOWDEF_H
+#ifndef DEFWINDOW_H
+#define DEFWINDOW_H
 
-#include "contentviewdef.h"
-#include "menubardef.h"
-#include "wscore.h"
+#include "def_contentview.h"
+#include "def_menubar.h"
+#include "WsCore.h"
 
 #include <QString>
 
@@ -62,11 +62,11 @@ namespace PlgDef {
              * @brief 获取本窗口中的活动视图
              * @param views 存取视图容器
              */
-            virtual void getActivedView(QList<ContentView::I_ContentView*> *views) = 0;
+            virtual QList<ContentView::I_ContentView *> * getActivedView() = 0;
         };
     }
 
 }
 
 
-#endif // WINDOWDEF_H
+#endif // DEFWINDOW_H

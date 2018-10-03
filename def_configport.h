@@ -1,26 +1,29 @@
-#ifndef CONFIGPORT_H
-#define CONFIGPORT_H
+#ifndef DEFCONFIGPORT_H
+#define DEFCONFIGPORT_H
 
-#include "plugindef_base.h"
+#include "def_plugin_base.h"
 
 
 namespace PlgDef {
     namespace ConfigPort {
         class I_ConfigPort : public I_PluginBase{
         public:
+            I_ConfigPort();
+            virtual ~I_ConfigPort(){}
+
             /**
              * @brief 创建一个新的配置文件访问接口
              * @param fPath 配置文件路径
              * @return 实例
              */
-            I_ConfigPort* createNewPort(QString* fPath);
+            virtual I_ConfigPort* createNewPort(QString *const fPath)=0;
 
             /**
              * @brief 设置配置条目
              * @param key 键名
              * @param value 内容值
              */
-            void setKeyValue(QString *key, QString *value);
+            virtual void setKeyValue(QString *const key, QString *const value)=0;
 
             /**
              * @brief 获取配置条目
@@ -28,9 +31,9 @@ namespace PlgDef {
              * @param defaultValue 默认值
              * @return 配置的内容值
              */
-            QString* getValue(QString *key, QString *defaultValue);
+            virtual QString * getValue(QString *const key, QString *const defaultValue)=0;
         };
     }
 }
 
-#endif // CONFIGPORT_H
+#endif // DEFCONFIGPORT_H

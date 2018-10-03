@@ -1,7 +1,7 @@
-#ifndef CONTENTVIEWDEF_H
-#define CONTENTVIEWDEF_H
+#ifndef DEFCONTENTVIEW_H
+#define DEFCONTENTVIEW_H
 
-#include "plugindef_base.h"
+#include "def_plugin_base.h"
 
 
 
@@ -21,4 +21,4 @@ namespace PlgDef {
     }
 }
 
-#endif // CONTENTVIEWDEF_H
+#endif // DEFCONTENTVIEW_H

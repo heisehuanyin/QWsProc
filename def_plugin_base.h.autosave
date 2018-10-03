@@ -1,5 +1,5 @@
-#ifndef PLUGINDEF_BASE_H
-#define PLUGINDEF_BASE_H
+#ifndef DEFPLUGIN_BASE_H
+#define DEFPLUGIN_BASE_H
 
 #include <QMenu>
 
@@ -75,6 +75,28 @@ namespace PlgDef{
         virtual QString* getFilePath() = 0;
         virtual QString* getSimpleFileName() = 0;
     };
+
+    class I_PluginException:std::exception{
+    private:
+        QString *const reason;
+        
+        
+    public:
+        I_PluginException(QString &reason):
+            reason(&reason)
+        {
+            
+        }
+        virtual ~I_PluginException();
+        
+        
+        
+        // exception interface
+    public:
+        virtual const char *what(){
+            
+        }
+    };
 }
 
-#endif // PLUGINDEF_H
+#endif // DEFPLUGIN_BASE_H
