@@ -7,10 +7,6 @@
 namespace PlgDef {
 
     namespace LogPort {
-        namespace  {
-            QString DefaultWindowType_Key = "DefaultWinType";
-            QString DefaultWindowType_Value = "DefaultSingalView";
-        }
 
         class I_LogPort : public I_PluginBase
         {

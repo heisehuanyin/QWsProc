@@ -9,6 +9,7 @@ namespace PlgDef {
     namespace ConfigPort {
         class DefaultConfigPort : public I_ConfigPort
         {
+            Q_OBJECT
         public:
             DefaultConfigPort();
             virtual ~DefaultConfigPort() override{

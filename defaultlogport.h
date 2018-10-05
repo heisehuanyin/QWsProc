@@ -8,6 +8,7 @@ namespace PlgDef {
     namespace LogPort {
         class DefaultLogPort : public I_LogPort
         {
+            Q_OBJECT
         private:
             const QString pluginName;
             QFile * logPort;

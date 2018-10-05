@@ -21,7 +21,10 @@ namespace PlgDef {
 namespace Core {
     class WsCore;
 
-    class PluginManager final{
+    class PluginManager final:public QObject
+    {
+        Q_OBJECT
+
     public:
         PluginManager(WsCore* core);
         ~PluginManager();
@@ -135,6 +138,8 @@ namespace Core {
          */
         void instance_RegisterPluginInstance(const QString key, PlgDef::I_PluginBase *const p);
 
+    private slots:
+        void slot_saveWindowSize(const QString groupID, int width, int height);
 
     };
 

@@ -85,7 +85,10 @@ void Core::WsCore::slot_Recieve_ProcessError(PlgDef::I_PluginBase * const resp, 
     log->errorLog(resp,msg);
 
     QString title("");
-    title += resp->registName();
+    if(resp)
+        title += resp->registName();
+    else
+        title += "MainFrame";
 
     QMessageBox::StandardButton reply;
     reply = QMessageBox::critical(nullptr, title, msg,QMessageBox::Ignore | QMessageBox::Abort);
@@ -240,9 +243,17 @@ PlgDef::I_PluginBase *Core::PluginManager::instance_GetWindowInstance(const QStr
     if(cList != nullptr)
         return dynamic_cast<Win::I_Window *>(*cList->constBegin());
 
-    auto factory = this->factory_GetExistsFactoryWithCfg(Log::DefaultWindowType_Key, Log::DefaultWindowType_Value);
+    auto factory = this->factory_GetExistsFactoryWithCfg(Cfg::DefaultWindowType_Key, Cfg::DefaultWindowType_Value);
     auto win = dynamic_cast<Win::I_Window *>(factory)->openNewWindow(this->core, gId);
     this->instance_RegisterPluginInstance(gId, win);
+
+    auto cfgi = this->core->instance_GetMainConfigPort();
+    QString width = cfgi->getValue(Cfg::DefaultWindowWidth_Key(gId), Cfg::DefaultWindowWidth_Value);
+    QString height = cfgi->getValue(Cfg::DefaultWindowHeight_Key(gId), Cfg::DefaultWindowHeight_Value);
+    win->setSize(width.toInt(), height.toInt());
+
+    this->connect(win, &Win::I_Window::signal_resizeWindow,
+                  this, &PluginManager::slot_saveWindowSize);
 
     return win;
 }
@@ -291,6 +302,7 @@ PlgDef::I_PluginBase *Core::PluginManager::factory_GetExistsFactoryWithCfg
         msg += fId;
 
         this->core->instance_GetDefaultLogPort()->errorLog(nullptr, msg);
+        this->core->slot_Recieve_ProcessError(nullptr, msg);
     }
     return factory;
 }
@@ -308,3 +320,26 @@ void Core::PluginManager::instance_RegisterPluginInstance(const QString key, Plg
     }
     cList.value()->insert(0, p);
 }
+
+void Core::PluginManager::slot_saveWindowSize(const QString groupID, int width, int height)
+{
+    auto cfg = this->core->instance_GetMainConfigPort();
+    QString wStr = QString("%1").arg(width, 5, 10, QChar('0'));
+    QString hStr = QString("%1").arg(height,5, 10, QChar('0'));
+
+    cfg->setKeyValue(Cfg::DefaultWindowHeight_Key(groupID), hStr);
+    cfg->setKeyValue(Cfg::DefaultWindowWidth_Key(groupID), wStr);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -12,17 +12,10 @@ namespace PlgDef {
 
         class DefaultSingalView : public PlgDef::Window::I_Window
         {
-        private:
-            QString gid;
-            Core::WsCore * core;
-            PlgDef::ContentView::I_ContentView * centralView;
-            const QString plgName;
-            _CustomWindow *const window;
-            QList<PlgDef::ContentView::I_ContentView *> *const list;
-
+            Q_OBJECT
         public:
             DefaultSingalView();
-            ~DefaultSingalView() override;
+            virtual ~DefaultSingalView() override;
 
             // I_PluginBase interface
         public:
@@ -40,7 +33,20 @@ namespace PlgDef {
             void closeContentView(PlgDef::ContentView::I_ContentView *comp) override;
             void service_RefreshMenuBar(PlgDef::MenuBar::I_MenuBar *bar) override;
             QList<PlgDef::ContentView::I_ContentView *> * getActivedView() override;
+            virtual void setSize(int width, int height) override;
 
+        private:
+            QString gid;
+            Core::WsCore * core;
+            PlgDef::ContentView::I_ContentView * centralView;
+            const QString plgName;
+            _CustomWindow *const window;
+            QList<PlgDef::ContentView::I_ContentView *> *const list;
+
+        private slots:
+            void receiveWindowResize(int width, int height){
+                emit this->signal_resizeWindow(this->gid, width, height);
+            }
         };
 
     }

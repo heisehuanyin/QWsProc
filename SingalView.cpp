@@ -4,17 +4,20 @@ using namespace PlgDef::Window;
 namespace MBar = PlgDef::MenuBar;
 namespace CView = PlgDef::ContentView;
 
-DefaultSingalView::DefaultSingalView():I_Window (),
+DefaultSingalView::DefaultSingalView():
+    I_Window (),
     plgName("DefaultSingalView"),
     window(new _CustomWindow()),
     list(new QList<PlgDef::ContentView::I_ContentView *>())
 {
-
+    this->connect(this->window, &_CustomWindow::resizeWindow,
+                  this, &DefaultSingalView::receiveWindowResize);
 }
 
 DefaultSingalView::~DefaultSingalView()
 {
     delete this->window;
+    delete this->list;
 }
 
 const QString DefaultSingalView::registName()
@@ -84,6 +87,11 @@ QList<CView::I_ContentView *> * DefaultSingalView::getActivedView()
     this->list->clear();
     this->list->append(this->centralView);
     return this->list;
+}
+
+void DefaultSingalView::setSize(int width, int height)
+{
+    this->window->resize(width, height);
 }
 
 

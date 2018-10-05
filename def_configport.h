@@ -6,6 +6,22 @@
 
 namespace PlgDef {
     namespace ConfigPort {
+        namespace  {
+            QString DefaultWindowType_Key = "DefaultWinType";
+            QString DefaultWindowType_Value = "DefaultSingalView";
+            QString DefaultWindowWidth_Value = "800";
+            QString DefaultWindowHeight_Value = "600";
+
+            QString DefaultWindowWidth_Key(QString groupID){
+                QString key = "default.window." + groupID + ".width";
+                return key;
+            }
+            QString DefaultWindowHeight_Key(QString groupID){
+                QString key = "default.window." + groupID + ".height";
+                return key;
+            }
+        }
+
         class I_ConfigPort : public I_PluginBase
         {
             Q_OBJECT
