@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 
         return 0;
     }
+
     if(argc == 2 && QString("-test") == argv[1]){
         app->service_OpenSilentModel();
         app->test_InnerTest();
@@ -52,8 +53,9 @@ int main(int argc, char *argv[])
 
         return 0;
     }
-    QString win_id("Default");
-    app->service_OpenGraphicsModel(&win_id);
+
+
+    app->service_OpenGraphicsModel("Default");
 
 
 

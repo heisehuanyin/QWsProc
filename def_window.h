@@ -30,26 +30,26 @@ namespace PlgDef {
              * @param gid GroupId
              * @return 新实例
              */
-            virtual I_Window* openNewWindow(Core::WsCore *core, QString* gid) = 0;
+            virtual I_Window* openNewWindow(Core::WsCore *core, const QString gid) = 0;
 
             /**
              * @brief 获取本实例绑定的GroupId
              * @return GroupId
              */
-            virtual QString* getGroupID() = 0;
+            virtual const QString getGroupID() = 0;
 
             /**
              * @brief 设置窗口标题
              * @param title 标题
              */
-            virtual void setTitle(QString *title) = 0;
+            virtual void setTitle(const QString title) = 0;
 
             /**
              * @brief 将ContentView放置在本窗体上
              * @param viewTitle 视图标题
              * @param comp 视图组件
              */
-            virtual void placeView(QString *viewTitle, ContentView::I_ContentView *comp) = 0;
+            virtual void placeView(const QString viewTitle, ContentView::I_ContentView *comp) = 0;
 
             /**
              * @brief 关闭指定ContentView

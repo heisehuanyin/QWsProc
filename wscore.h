@@ -36,7 +36,7 @@ namespace Core {
          * @brief 全局保存操作
          */
         void operate_SaveOperation();
-        void operate_BuildChannel(QString *const cStr, QString* const cId);
+        void operate_BuildChannel(QString *const cStr, const QString cId);
 
         /**
          * @brief 保存特定通道所有插件内容
@@ -48,7 +48,7 @@ namespace Core {
          * @brief 移除特定通道
          * @param cId 通道id
          */
-        void channel_CloseChannelWithoutSave(QString *const cId);
+        void channel_CloseChannelWithoutSave(const QString cId);
 
         /**
          * @brief 通过插件实例，查询指定插件通道id
@@ -62,7 +62,7 @@ namespace Core {
          * @param cId 通道id
          * @return 插件实例通道
          */
-        QList<PlgDef::I_PluginBase *> * channel_GetExistsChannel(QString *const cId);
+        QList<PlgDef::I_PluginBase *> * channel_GetExistsChannel(const QString cId);
 
 
         //Special Components
@@ -71,14 +71,14 @@ namespace Core {
          * @param fPath 配置文件路径
          * @return Configport实例
          */
-        PlgDef::ConfigPort::I_ConfigPort *instance_GetConfigport(QString *const fPath);
+        PlgDef::ConfigPort::I_ConfigPort *instance_GetConfigport(const QString fPath);
 
         /**
          * @brief 获取一个Logport实例，每次程序启动，只保留最后装载的一种Logport插件
          * @param fPath Log文件路径
          * @return Logport插件实例
          */
-        PlgDef::LogPort::I_LogPort *instance_GetLogport(QString *const fPath);
+        PlgDef::LogPort::I_LogPort *instance_GetLogport(const QString fPath);
 
         //UI Components
         /**
@@ -86,8 +86,8 @@ namespace Core {
          * @param gId GroupId
          * @return 实例
          */
-        PlgDef::I_PluginBase * instance_GetWindowInstance(QString *const gId);
-        PlgDef::I_PluginBase * instance_GetMenuBarInstance(QString *const gId);
+        PlgDef::I_PluginBase * instance_GetWindowInstance(const QString gId);
+        PlgDef::I_PluginBase * instance_GetMenuBarInstance(const QString gId);
 
         //Query Methods
         /**
@@ -102,16 +102,15 @@ namespace Core {
          * @param pRegistName 插件注册名
          * @return 信息组合
          */
-        QList<QPair<QString, PlgDef::PluginType>> * service_QueryFactoryList(QString *const pRegistName);
+        QList<QPair<QString, PlgDef::PluginType>> * service_QueryFactoryList(const QString pRegistName);
 
     private:
         QHash<QString, PlgDef::I_PluginBase *> *const factories;
         QList<PlgDef::I_PluginBase *> *const configunits;
         QHash<QString, QList<PlgDef::I_PluginBase *> *> *const instances;
         WsCore *const core;
-        const QString *logportName;
-        const QString *configportName;
-        QString * error;
+        QString logportName;
+        QString configportName;
         QList<QPair<QString, PlgDef::PluginType>> *const list;
 
         /**
@@ -119,7 +118,7 @@ namespace Core {
          * @param key 插件注册名
          * @return 插件实例生成器
          */
-        PlgDef::I_PluginBase * factory_GetExistsFactory(const QString *const key);
+        PlgDef::I_PluginBase * factory_GetExistsFactory(const QString key);
 
         /**
          * @brief 输入指定配置条目和默认配置值，获取插件实例生成器。若配置文件中条目为空，写入默认值
@@ -127,14 +126,14 @@ namespace Core {
          * @param defaultVal 默认配置值
          * @return 插件实例
          */
-        PlgDef::I_PluginBase * factory_GetExistsFactoryWithCfg(QString *const key, QString *const defaultVal);
+        PlgDef::I_PluginBase * factory_GetExistsFactoryWithCfg(const QString key, const QString defaultVal);
 
         /**
          * @brief 注册插件实例到Manager
          * @param key 注册键名
          * @param p 插件实例
          */
-        void instance_RegisterPluginInstance(QString *const key, PlgDef::I_PluginBase *const p);
+        void instance_RegisterPluginInstance(const QString key, PlgDef::I_PluginBase *const p);
 
 
     };
@@ -178,7 +177,7 @@ namespace Core {
          * @param fileIndicate 文件指代符
          * @param win 发出请求的窗口
          */
-        void service_OpenFile(const QString * filePath, PlgDef::I_PluginBase *win);
+        void service_OpenFile(const QString filePath, PlgDef::I_PluginBase *win);
 
         /**
          * @brief 获取默认的LogPort插件实例
@@ -201,19 +200,19 @@ namespace Core {
          * @brief 打开图形模式，所有操作可以通过图形界面进行操作
          * @param groupId 插件实例注册id
          */
-        void service_OpenGraphicsModel(QString* groupId);
+        void service_OpenGraphicsModel(const QString groupId);
 
         void test_InnerTest();
 
     public slots:
-        void slot_Recieve_ProcessError(PlgDef::I_PluginBase *const res, QString *const msg);
+        void slot_Recieve_ProcessError(PlgDef::I_PluginBase *const res, const QString msg);
 
     private:
         void operate_LoadAllPlugins();
         void operate_InitDefaultPlugins();
 
-        QString *const DefaultLogpath;
-        QString *const DefaultConfigpath;
+        const QString DefaultLogpath;
+        const QString DefaultConfigpath;
         PluginManager *const manager;
     };
 }

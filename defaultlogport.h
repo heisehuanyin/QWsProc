@@ -9,10 +9,9 @@ namespace PlgDef {
         class DefaultLogPort : public I_LogPort
         {
         private:
-            QString *const pluginName;
+            const QString pluginName;
             QFile * logPort;
             QTextStream * logStream;
-            QString * error;
 
         public:
             DefaultLogPort();
@@ -20,17 +19,17 @@ namespace PlgDef {
 
             // I_PluginBase interface
         public:
-            virtual const QString *registName() override;
+            virtual const QString registName() override;
             virtual PluginType upStreamMark() override;
             virtual QMenu *getCustomMenu() override;
             virtual void saveOperation() override;
 
             // I_LogPort interface
         public:
-            virtual I_LogPort *createNewPort(QString * const fPath) override;
-            virtual void writeLog(I_PluginBase *p, QString * const msg) override;
-            virtual void errorLog(I_PluginBase *p, QString * const msg) override;
-            virtual void echoLog(I_PluginBase *p, QString * const msg) override;
+            virtual I_LogPort *createNewPort(const QString fPath) override;
+            virtual void writeLog(I_PluginBase *p, const QString msg) override;
+            virtual void errorLog(I_PluginBase *p, const QString msg) override;
+            virtual void echoLog(I_PluginBase *p, const QString msg) override;
         };
     }
 }

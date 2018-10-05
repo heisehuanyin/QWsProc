@@ -37,7 +37,7 @@ namespace PlgDef{
          * @brief 插件注册名称，不可重复
          * @return 插件注册名称
          */
-        virtual const QString* registName() = 0;
+        virtual const QString registName() = 0;
 
         /**
          * @brief 获取插件类别
@@ -68,7 +68,7 @@ namespace PlgDef{
          * @param resp 发生问题的插件
          * @param msg 错误相关信息
          */
-        void signal_Recieve_ProcessError(PlgDef::I_PluginBase *const resp, QString *const msg);
+        void signal_Recieve_ProcessError(PlgDef::I_PluginBase *const resp, const QString msg);
     };
 }
 

@@ -10,8 +10,8 @@ namespace Cfg = PlgDef::ConfigPort;
 namespace Win = PlgDef::Window;
 
 Core::WsCore::WsCore():
-    DefaultLogpath(new QString("./log.wslog")),
-    DefaultConfigpath(new QString("./cfg.wscfg")),
+    DefaultLogpath("./log.wslog"),
+    DefaultConfigpath("./cfg.wscfg"),
     manager(new PluginManager(this))
 {
 
@@ -20,8 +20,6 @@ Core::WsCore::WsCore():
 Core::WsCore::~WsCore()
 {
     delete this->manager;
-    delete this->DefaultConfigpath;
-    delete this->DefaultLogpath;
 }
 
 Core::PluginManager* Core::WsCore::service_getManager()
@@ -47,7 +45,7 @@ void Core::WsCore::service_SaveOperation()
     this->manager->operate_SaveOperation();
 }
 
-void Core::WsCore::service_OpenFile(const QString * filePath, PlgDef::I_PluginBase *win)
+void Core::WsCore::service_OpenFile(const QString filePath, PlgDef::I_PluginBase *win)
 {
     //TODO
 }
@@ -68,7 +66,7 @@ void Core::WsCore::service_OpenSilentModel()
     this->operate_LoadAllPlugins();
 }
 
-void Core::WsCore::service_OpenGraphicsModel(QString *groupId)
+void Core::WsCore::service_OpenGraphicsModel(const QString groupId)
 {
     this->service_OpenSilentModel();
     this->service_getManager()->instance_GetWindowInstance(groupId);
@@ -78,19 +76,19 @@ void Core::WsCore::test_InnerTest()
 {
     auto x = this->instance_GetDefaultLogPort();
     QString msg("测试弹出错误对话框");
-    emit x->signal_Recieve_ProcessError(x, &msg);
+    emit x->signal_Recieve_ProcessError(x, msg);
 }
 
-void Core::WsCore::slot_Recieve_ProcessError(PlgDef::I_PluginBase * const resp, QString * const msg)
+void Core::WsCore::slot_Recieve_ProcessError(PlgDef::I_PluginBase * const resp, QString msg)
 {
     auto log = this->instance_GetDefaultLogPort();
     log->errorLog(resp,msg);
 
     QString title("");
-    title += *resp->registName();
+    title += resp->registName();
 
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::critical(nullptr, title, *msg,QMessageBox::Ignore | QMessageBox::Abort);
+    reply = QMessageBox::critical(nullptr, title, msg,QMessageBox::Ignore | QMessageBox::Abort);
 
     if(reply == QMessageBox::Abort){
         this->service_SaveOperation();
@@ -107,7 +105,7 @@ void Core::WsCore::operate_InitDefaultPlugins()
 {
     this->service_RegisterPlugin(new Log::DefaultLogPort());
     this->service_RegisterPlugin(new Cfg::DefaultConfigPort());
-    this->service_RegisterPlugin(new Win::SingalView());
+    this->service_RegisterPlugin(new Win::DefaultSingalView());
 }
 
 
@@ -117,8 +115,8 @@ Core::PluginManager::PluginManager(Core::WsCore *core):
     configunits(new QList<PlgDef::I_PluginBase *>()),
     instances(new QHash<QString, QList<PlgDef::I_PluginBase *> *>()),
     core(core),
-    logportName(new QString),
-    configportName(new QString),
+    logportName(""),
+    configportName(""),
     list(new QList<QPair<QString, PlgDef::PluginType>>())
 {
 
@@ -133,11 +131,11 @@ Core::PluginManager::~PluginManager()
 
 void Core::PluginManager::factory_RegisterPlugin(PlgDef::I_PluginBase *p)
 {
-    auto repeat = this->factories->find(*p->registName());
+    auto repeat = this->factories->find(p->registName());
     if(repeat != this->factories->constEnd()){
-        *this->error = "重复注册插件：";
-        *this->error += *p->registName();
-        emit p->signal_Recieve_ProcessError(p, this->error);
+        QString error = "重复注册插件：";
+        error += p->registName();
+        emit p->signal_Recieve_ProcessError(p, error);
 
         return;
     }
@@ -150,7 +148,7 @@ void Core::PluginManager::factory_RegisterPlugin(PlgDef::I_PluginBase *p)
         this->logportName = p->registName();
     }
 
-    this->factories->insert(*p->registName(), p);
+    this->factories->insert(p->registName(), p);
 }
 
 void Core::PluginManager::operate_SaveOperation()
@@ -174,10 +172,10 @@ void Core::PluginManager::channel_SaveChannel(QList<PlgDef::I_PluginBase *> * ch
     }
 }
 
-void Core::PluginManager::channel_CloseChannelWithoutSave(QString *const key)
+void Core::PluginManager::channel_CloseChannelWithoutSave(const QString key)
 {
-    if(this->instances->contains(*key)){
-        auto channel = this->instances->take(*key);
+    if(this->instances->contains(key)){
+        auto channel = this->instances->take(key);
         for(auto plugin = channel->begin();
             plugin != channel->end();
             ++plugin){
@@ -200,15 +198,15 @@ const QString * Core::PluginManager::channel_getChannelId(PlgDef::I_PluginBase *
     return nullptr;
 }
 
-QList<PlgDef::I_PluginBase *> *Core::PluginManager::channel_GetExistsChannel(QString * const cId)
+QList<PlgDef::I_PluginBase *> *Core::PluginManager::channel_GetExistsChannel(const QString cId)
 {
-    if(this->instances->contains(*cId)){
-        return this->instances->find(*cId).value();
+    if(this->instances->contains(cId)){
+        return this->instances->find(cId).value();
     }
     return nullptr;
 }
 
-Cfg::I_ConfigPort *Core::PluginManager::instance_GetConfigport(QString * const fPath)
+Cfg::I_ConfigPort *Core::PluginManager::instance_GetConfigport(const QString fPath)
 {
     auto cList = this->channel_GetExistsChannel(fPath);
     if(cList != nullptr)
@@ -222,7 +220,7 @@ Cfg::I_ConfigPort *Core::PluginManager::instance_GetConfigport(QString * const f
     return config;
 }
 
-Log::I_LogPort *Core::PluginManager::instance_GetLogport(QString * const fPath)
+Log::I_LogPort *Core::PluginManager::instance_GetLogport(const QString fPath)
 {
     auto cList = this->channel_GetExistsChannel(fPath);
     if(cList != nullptr)
@@ -236,13 +234,13 @@ Log::I_LogPort *Core::PluginManager::instance_GetLogport(QString * const fPath)
     return log;
 }
 
-PlgDef::I_PluginBase *Core::PluginManager::instance_GetWindowInstance(QString * const gId)
+PlgDef::I_PluginBase *Core::PluginManager::instance_GetWindowInstance(const QString gId)
 {
     auto cList = this->channel_GetExistsChannel(gId);
     if(cList != nullptr)
         return dynamic_cast<Win::I_Window *>(*cList->constBegin());
 
-    auto factory = this->factory_GetExistsFactoryWithCfg(&Log::DefaultWindowType_Key, &Log::DefaultWindowType_Value);
+    auto factory = this->factory_GetExistsFactoryWithCfg(Log::DefaultWindowType_Key, Log::DefaultWindowType_Value);
     auto win = dynamic_cast<Win::I_Window *>(factory)->openNewWindow(this->core, gId);
     this->instance_RegisterPluginInstance(gId, win);
 
@@ -258,32 +256,32 @@ QList<QPair<QString, PlgDef::PluginType> > *Core::PluginManager::service_QueryFa
         itor++){
         if((itor.value())->pluginMark() == typeMark){
             this->list->append(QPair<const QString, PlgDef::PluginType>
-                                (*itor.value()->registName(), itor.value()->upStreamMark()));
+                                (itor.value()->registName(), itor.value()->upStreamMark()));
         }
     }
 
     return this->list;
 }
 
-QList<QPair<QString, PlgDef::PluginType> > *Core::PluginManager::service_QueryFactoryList(QString * const pRegistName)
+QList<QPair<QString, PlgDef::PluginType> > *Core::PluginManager::service_QueryFactoryList(const QString pRegistName)
 {
     auto typeMark = this->factory_GetExistsFactory(pRegistName)->pluginMark();
     return this->service_QueryFactoryList(typeMark);
 }
 
-PlgDef::I_PluginBase *Core::PluginManager::factory_GetExistsFactory(const QString * const key)
+PlgDef::I_PluginBase *Core::PluginManager::factory_GetExistsFactory(const QString key)
 {
-    if(this->factories->contains(*key)){
-        auto x = this->factories->find(*key);
+    if(this->factories->contains(key)){
+        auto x = this->factories->find(key);
         return x.value();
     }
     return nullptr;
 }
 
 PlgDef::I_PluginBase *Core::PluginManager::factory_GetExistsFactoryWithCfg
-            (QString * const key, QString * const defaultVal)
+            (const QString key, const QString defaultVal)
 {
-    const QString *const fId = this->core->instance_GetMainConfigPort()
+    const QString fId = this->core->instance_GetMainConfigPort()
             ->getValue(key, defaultVal);
 
     auto factory = this->factory_GetExistsFactory(fId);
@@ -292,21 +290,21 @@ PlgDef::I_PluginBase *Core::PluginManager::factory_GetExistsFactoryWithCfg
         QString msg = "配置文件出错，插件factory_id不存在，注册值:";
         msg += fId;
 
-        this->core->instance_GetDefaultLogPort()->errorLog(nullptr, &msg);
+        this->core->instance_GetDefaultLogPort()->errorLog(nullptr, msg);
     }
     return factory;
 }
 
-void Core::PluginManager::instance_RegisterPluginInstance(QString * const key, PlgDef::I_PluginBase * const p)
+void Core::PluginManager::instance_RegisterPluginInstance(const QString key, PlgDef::I_PluginBase * const p)
 {
     QObject::connect(p, &PlgDef::I_PluginBase::signal_Recieve_ProcessError,
                      this->core, &WsCore::slot_Recieve_ProcessError);
 
-    auto cList = this->instances->find(*key);
+    auto cList = this->instances->find(key);
     if(cList == this->instances->end()){
         auto c = new QList<PlgDef::I_PluginBase *>();
-        this->instances->insert(*key, c);
-        cList = this->instances->find(*key);
+        this->instances->insert(key, c);
+        cList = this->instances->find(key);
     }
     cList.value()->insert(0, p);
 }

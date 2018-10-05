@@ -4,20 +4,18 @@
 using namespace PlgDef::LogPort;
 
 DefaultLogPort::DefaultLogPort():
-    pluginName(new QString("DefaultLogPort"))
+    pluginName("DefaultLogPort")
 {
 
 }
 
 PlgDef::LogPort::DefaultLogPort::~DefaultLogPort()
 {
-    delete this->pluginName;
     delete this->logPort;
     delete this->logStream;
-    delete this->error;
 }
 
-const QString *DefaultLogPort::registName()
+const QString DefaultLogPort::registName()
 {
     return this->pluginName;
 }
@@ -38,14 +36,13 @@ void PlgDef::LogPort::DefaultLogPort::saveOperation()
     this->logStream->flush();
 }
 
-I_LogPort *PlgDef::LogPort::DefaultLogPort::createNewPort(QString * const fPath)
+I_LogPort *PlgDef::LogPort::DefaultLogPort::createNewPort(const QString fPath)
 {
     DefaultLogPort* rtn = new DefaultLogPort();
-    rtn->logPort = new QFile(*fPath);
+    rtn->logPort = new QFile(fPath);
     if(! rtn->logPort->open(QIODevice::WriteOnly|QIODevice::Text)){
-        *this->error = "打开Log文件过程中出现错误";
 
-        emit this->signal_Recieve_ProcessError(this, this->error);
+        emit this->signal_Recieve_ProcessError(this, "打开Log文件过程中出现错误");
 
         return nullptr;
     }
@@ -54,7 +51,7 @@ I_LogPort *PlgDef::LogPort::DefaultLogPort::createNewPort(QString * const fPath)
     return rtn;
 }
 
-void PlgDef::LogPort::DefaultLogPort::writeLog(PlgDef::I_PluginBase *p, QString * const msg)
+void PlgDef::LogPort::DefaultLogPort::writeLog(PlgDef::I_PluginBase *p, const QString msg)
 {
     QString msgout = "Log::";
     if(p==nullptr)
@@ -62,10 +59,10 @@ void PlgDef::LogPort::DefaultLogPort::writeLog(PlgDef::I_PluginBase *p, QString 
     else
         msgout += p->registName();
 
-    *this->logStream <<msgout <<":"<<*msg <<"\n";
+    *this->logStream <<msgout <<":"<<msg <<"\n";
 }
 
-void PlgDef::LogPort::DefaultLogPort::errorLog(PlgDef::I_PluginBase *p, QString * const msg)
+void PlgDef::LogPort::DefaultLogPort::errorLog(PlgDef::I_PluginBase *p, const QString msg)
 {
     QString msgout = "Error::";
     if(p==nullptr)
@@ -74,18 +71,19 @@ void PlgDef::LogPort::DefaultLogPort::errorLog(PlgDef::I_PluginBase *p, QString 
         msgout += p->registName();
 
 
-    *this->logStream <<msgout <<":"<<*msg;
+    *this->logStream <<msgout <<":"<<msg;
+    std::cout<<msg.toStdString() <<std::endl;
 }
 
-void PlgDef::LogPort::DefaultLogPort::echoLog(PlgDef::I_PluginBase *p, QString * const msg)
+void PlgDef::LogPort::DefaultLogPort::echoLog(PlgDef::I_PluginBase *p, const QString msg)
 {
     QString msgout = "Echo::";
     if(p==nullptr)
         msgout += "MainFramework";
     else
-        msgout += *p->registName();
+        msgout += p->registName();
 
 
-    *this->logStream <<msgout <<":" <<*msg <<"\n";
-    std::cout<<msg <<std::endl;
+    *this->logStream <<msgout <<":" <<msg <<"\n";
+    std::cout<<msg.toStdString() <<std::endl;
 }
