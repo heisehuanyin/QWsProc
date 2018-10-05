@@ -5,6 +5,8 @@
 #include "def_menubar.h"
 #include "WsCore.h"
 
+#include <QMainWindow>
+#include <QResizeEvent>
 #include <QString>
 
 
@@ -15,10 +17,13 @@ namespace PlgDef {
     namespace Window {
         /**
         @brief 窗口*/
-        class I_Window: public I_PluginBase{
+        class I_Window: public I_PluginBase
+        {
+            Q_OBJECT
+
         public:
             I_Window(){}
-            virtual ~I_Window(){}
+            virtual ~I_Window() override {}
             /**
              * @brief 创建一个新的Window实例,与原本的实例并无任何联系
              * @param core 核心调度模块
@@ -63,6 +68,37 @@ namespace PlgDef {
              * @param views 存取视图容器
              */
             virtual QList<ContentView::I_ContentView *> * getActivedView() = 0;
+
+
+            // I_PluginBase interface
+        public:
+            virtual PluginType pluginMark() override final{
+                return PlgDef::UI_Window;
+            }
+        };
+
+
+        /**
+         * @brief 自定义一个基础窗口，将QMainWindow中的一些信号发射出来
+         */
+        class _CustomWindow:public QMainWindow
+        {
+            Q_OBJECT
+
+        public:
+            _CustomWindow(QWidget *parent = nullptr):
+                QMainWindow(parent)
+            {}
+            ~_CustomWindow() override {}
+        signals:
+            void resizeWindow(int width, int height);
+
+        protected:
+            void resizeEvent(QResizeEvent *event) override {
+                this->QMainWindow::resizeEvent(event);
+                auto size = event->size();
+                emit this->resizeWindow(size.width(), size.height());
+            }
         };
     }
 

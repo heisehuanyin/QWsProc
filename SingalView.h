@@ -4,6 +4,7 @@
 #include "def_window.h"
 
 #include <QMainWindow>
+#include <QResizeEvent>
 
 
 namespace PlgDef {
@@ -15,8 +16,8 @@ namespace PlgDef {
             QString *gid;
             Core::WsCore * core;
             PlgDef::ContentView::I_ContentView * centralView;
-            QString *const plgName;
-            QMainWindow *const window;
+            const QString *const plgName;
+            _CustomWindow *const window;
             QList<PlgDef::ContentView::I_ContentView *> *const list;
 
         public:
@@ -25,8 +26,7 @@ namespace PlgDef {
 
             // I_PluginBase interface
         public:
-            QString *registName();
-            PlgDef::PluginType pluginMark();
+            const QString *registName();
             PlgDef::PluginType upStreamMark();
             QMenu *getCustomMenu();
             void saveOperation();

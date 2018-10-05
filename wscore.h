@@ -2,6 +2,7 @@
 #define WSCORE_H
 
 #include "def_plugin_base.h"
+#include <QMessageBox>
 
 namespace PlgDef {
     namespace ConfigPort {
@@ -108,8 +109,9 @@ namespace Core {
         QList<PlgDef::I_PluginBase *> *const configunits;
         QHash<QString, QList<PlgDef::I_PluginBase *> *> *const instances;
         WsCore *const core;
-        QString *logportName;
-        QString *configportName;
+        const QString *logportName;
+        const QString *configportName;
+        QString * error;
         QList<QPair<QString, PlgDef::PluginType>> *const list;
 
         /**
@@ -117,7 +119,7 @@ namespace Core {
          * @param key 插件注册名
          * @return 插件实例生成器
          */
-        PlgDef::I_PluginBase * factory_GetExistsFactory(QString *const key);
+        PlgDef::I_PluginBase * factory_GetExistsFactory(const QString *const key);
 
         /**
          * @brief 输入指定配置条目和默认配置值，获取插件实例生成器。若配置文件中条目为空，写入默认值
@@ -140,7 +142,10 @@ namespace Core {
 
 
 
-    class WsCore final{
+    class WsCore final:public QObject
+    {
+        Q_OBJECT
+
     public:
         WsCore();
         ~WsCore();
@@ -173,7 +178,7 @@ namespace Core {
          * @param fileIndicate 文件指代符
          * @param win 发出请求的窗口
          */
-        void service_OpenFile(PlgDef::I_FileSymbo *fileIndicate, PlgDef::I_PluginBase *win);
+        void service_OpenFile(const QString * filePath, PlgDef::I_PluginBase *win);
 
         /**
          * @brief 获取默认的LogPort插件实例
@@ -197,6 +202,11 @@ namespace Core {
          * @param groupId 插件实例注册id
          */
         void service_OpenGraphicsModel(QString* groupId);
+
+        void test_InnerTest();
+
+    public slots:
+        void slot_Recieve_ProcessError(PlgDef::I_PluginBase *const res, QString *const msg);
 
     private:
         void operate_LoadAllPlugins();

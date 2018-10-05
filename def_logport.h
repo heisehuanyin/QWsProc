@@ -12,10 +12,13 @@ namespace PlgDef {
             QString DefaultWindowType_Value = "SingleView";
         }
 
-        class I_LogPort : public I_PluginBase{
+        class I_LogPort : public I_PluginBase
+        {
+            Q_OBJECT
+
         public:
             I_LogPort(){}
-            virtual ~I_LogPort(){}
+            virtual ~I_LogPort() override {}
 
             /**
              * @brief 创建一个Log输出实例
@@ -24,6 +27,8 @@ namespace PlgDef {
              */
             virtual I_LogPort* createNewPort(QString *const fPath)=0;
 
+
+        public slots:
             /**
              * @brief 输出常规Log信息到文件
              * @param p 信息源插件
@@ -44,6 +49,12 @@ namespace PlgDef {
              * @param msg 信息
              */
             virtual void echoLog(PlgDef::I_PluginBase* p, QString *const msg)=0;
+
+            // I_PluginBase interface
+        public:
+            virtual PluginType pluginMark() override final{
+                return PlgDef::Service_LogPort;
+            }
         };
     }
 

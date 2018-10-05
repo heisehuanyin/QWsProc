@@ -25,7 +25,10 @@ namespace PlgDef{
     /**
     @brief 所有插件的共同基类
     */
-    class I_PluginBase{
+    class I_PluginBase : public QObject
+    {
+        Q_OBJECT
+
     public:
         I_PluginBase(){}
         virtual ~I_PluginBase(){}
@@ -34,7 +37,7 @@ namespace PlgDef{
          * @brief 插件注册名称，不可重复
          * @return 插件注册名称
          */
-        virtual QString* registName() = 0;
+        virtual const QString* registName() = 0;
 
         /**
          * @brief 获取插件类别
@@ -58,44 +61,14 @@ namespace PlgDef{
          * @brief 插件自身保存操作
          */
         virtual void saveOperation() = 0;
-    };
 
-    class I_PluginEvent {
-    public:
-        virtual ~I_PluginEvent();
-
-        virtual I_PluginBase* getSource()=0;
-        virtual QString* getMsg()=0;
-    };
-
-    class I_FileSymbo{
-    public:
-        virtual ~I_FileSymbo();
-
-        virtual QString* getFilePath() = 0;
-        virtual QString* getSimpleFileName() = 0;
-    };
-
-    class I_PluginException:std::exception{
-    private:
-        QString *const reason;
-
-
-    public:
-        I_PluginException(QString &reason):
-            reason(&reason)
-        {
-
-        }
-        virtual ~I_PluginException();
-
-
-
-        // exception interface
-    public:
-        virtual const char *what(){
-
-        }
+    signals:
+        /**
+         * @brief 所有插件共有的信号，用于报告插件内部错误
+         * @param resp 发生问题的插件
+         * @param msg 错误相关信息
+         */
+        void signal_Recieve_ProcessError(PlgDef::I_PluginBase *const resp, QString *const msg);
     };
 }
 

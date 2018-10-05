@@ -6,10 +6,13 @@
 
 namespace PlgDef {
     namespace ConfigPort {
-        class I_ConfigPort : public I_PluginBase{
+        class I_ConfigPort : public I_PluginBase
+        {
+            Q_OBJECT
+
         public:
-            I_ConfigPort();
-            virtual ~I_ConfigPort(){}
+            I_ConfigPort(){}
+            virtual ~I_ConfigPort() override {}
 
             /**
              * @brief 创建一个新的配置文件访问接口
@@ -19,19 +22,27 @@ namespace PlgDef {
             virtual I_ConfigPort* createNewPort(QString *const fPath)=0;
 
             /**
-             * @brief 设置配置条目
-             * @param key 键名
-             * @param value 内容值
-             */
-            virtual void setKeyValue(QString *const key, QString *const value)=0;
-
-            /**
-             * @brief 获取配置条目
+             * @brief 获取配置条目,如果配置文件中关于此配置条目的配置结果为空，则将默认值写入配置文件
              * @param key 键名
              * @param defaultValue 默认值
              * @return 配置的内容值
              */
-            virtual QString * getValue(QString *const key, QString *const defaultValue)=0;
+            virtual const QString * getValue(QString *const key, QString *const defaultValue)=0;
+
+        public slots:
+            /**
+             * @brief 设置配置条目
+             * @param key 键名：形如“xxxx.yyyy.cccc.zzzz”
+             * @param value 内容值
+             */
+            virtual void setKeyValue(QString *const key, QString *const value)=0;
+
+
+            // I_PluginBase interface
+        public:
+            virtual PluginType pluginMark() override final{
+                return PlgDef::Service_ConfigPort;
+            }
         };
     }
 }

@@ -16,9 +16,9 @@ int main(int argc, char *argv[])
     if(argc == 2 && QString("-print") == argv[1]){
         app->service_OpenSilentModel();
         auto m = app->service_getManager();
-        auto x = m->service_QueryFactoryList(PlgDef::IO_NoUpStream);
-        __printPluginList(PlgDef::IO_NoUpStream,x);
-        x = m->service_QueryFactoryList(PlgDef::IO_PluginSymbo);
+        std::cout<<"PlgDef::IO_NoUpStream => "<< PlgDef::IO_NoUpStream <<std::endl;
+
+        auto x = m->service_QueryFactoryList(PlgDef::IO_PluginSymbo);
         __printPluginList(PlgDef::IO_PluginSymbo,x);
         x = m->service_QueryFactoryList(PlgDef::IO_StyleModel);
         __printPluginList(PlgDef::IO_StyleModel,x);
@@ -45,10 +45,21 @@ int main(int argc, char *argv[])
 
         return 0;
     }
+    if(argc == 2 && QString("-test") == argv[1]){
+        app->service_OpenSilentModel();
+        app->test_InnerTest();
+        app->service_SaveOperation();
 
-    app->service_OpenGraphicsModel(new QString("Default"));
+        return 0;
+    }
+    QString win_id("Default");
+    app->service_OpenGraphicsModel(&win_id);
 
-    return a.exec();
+
+
+    int rtnum = a.exec();
+    app->service_SaveOperation();
+    return rtnum;
 }
 
 void __printPluginList(PlgDef::PluginType type ,QList<QPair<QString, PlgDef::PluginType>> *const list){

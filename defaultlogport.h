@@ -12,6 +12,7 @@ namespace PlgDef {
             QString *const pluginName;
             QFile * logPort;
             QTextStream * logStream;
+            QString * error;
 
         public:
             DefaultLogPort();
@@ -19,8 +20,7 @@ namespace PlgDef {
 
             // I_PluginBase interface
         public:
-            virtual QString *registName() override;
-            virtual PluginType pluginMark() override;
+            virtual const QString *registName() override;
             virtual PluginType upStreamMark() override;
             virtual QMenu *getCustomMenu() override;
             virtual void saveOperation() override;

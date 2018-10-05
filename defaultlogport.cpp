@@ -14,17 +14,14 @@ PlgDef::LogPort::DefaultLogPort::~DefaultLogPort()
     delete this->pluginName;
     delete this->logPort;
     delete this->logStream;
+    delete this->error;
 }
 
-QString *DefaultLogPort::registName()
+const QString *DefaultLogPort::registName()
 {
     return this->pluginName;
 }
 
-PlgDef::PluginType PlgDef::LogPort::DefaultLogPort::pluginMark()
-{
-    return PlgDef::Service_LogPort;
-}
 
 PlgDef::PluginType PlgDef::LogPort::DefaultLogPort::upStreamMark()
 {
@@ -45,9 +42,14 @@ I_LogPort *PlgDef::LogPort::DefaultLogPort::createNewPort(QString * const fPath)
 {
     DefaultLogPort* rtn = new DefaultLogPort();
     rtn->logPort = new QFile(*fPath);
-    if(! this->logPort->open(QIODevice::WriteOnly|QIODevice::Text))
-        throw
-    rtn->logStream = new QTextStream(this->logPort);
+    if(! rtn->logPort->open(QIODevice::WriteOnly|QIODevice::Text)){
+        *this->error = "打开Log文件过程中出现错误";
+
+        emit this->signal_Recieve_ProcessError(this, this->error);
+
+        return nullptr;
+    }
+    rtn->logStream = new QTextStream(rtn->logPort);
 
     return rtn;
 }
@@ -60,8 +62,7 @@ void PlgDef::LogPort::DefaultLogPort::writeLog(PlgDef::I_PluginBase *p, QString 
     else
         msgout += p->registName();
 
-
-    *this->logStream <<msgout <<":"<<msg;
+    *this->logStream <<msgout <<":"<<*msg <<"\n";
 }
 
 void PlgDef::LogPort::DefaultLogPort::errorLog(PlgDef::I_PluginBase *p, QString * const msg)
@@ -73,7 +74,7 @@ void PlgDef::LogPort::DefaultLogPort::errorLog(PlgDef::I_PluginBase *p, QString 
         msgout += p->registName();
 
 
-    *this->logStream <<msgout <<":"<<msg;
+    *this->logStream <<msgout <<":"<<*msg;
 }
 
 void PlgDef::LogPort::DefaultLogPort::echoLog(PlgDef::I_PluginBase *p, QString * const msg)
@@ -85,6 +86,6 @@ void PlgDef::LogPort::DefaultLogPort::echoLog(PlgDef::I_PluginBase *p, QString *
         msgout += *p->registName();
 
 
-    *this->logStream <<msgout <<":" <<msg <<"\n";
+    *this->logStream <<msgout <<":" <<*msg <<"\n";
     std::cout<<msg <<std::endl;
 }

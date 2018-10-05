@@ -6,7 +6,7 @@ namespace CView = PlgDef::ContentView;
 
 SingalView::SingalView():I_Window (),
     plgName(new QString("SingleView")),
-    window(new QMainWindow(nullptr)),
+    window(new _CustomWindow()),
     list(new QList<PlgDef::ContentView::I_ContentView *>())
 {
 
@@ -18,15 +18,11 @@ SingalView::~SingalView()
     delete this->window;
 }
 
-QString *SingalView::registName()
+const QString *SingalView::registName()
 {
     return this->plgName;
 }
 
-PlgDef::PluginType SingalView::pluginMark()
-{
-    return PlgDef::UI_Window;
-}
 
 PlgDef::PluginType SingalView::upStreamMark()
 {
