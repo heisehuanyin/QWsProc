@@ -10,36 +10,36 @@
 namespace PlgDef {
     namespace Window {
 
-        class SingalView : public PlgDef::Window::I_Window
+        class DefaultSingalView : public PlgDef::Window::I_Window
         {
         private:
-            QString *gid;
+            QString gid;
             Core::WsCore * core;
             PlgDef::ContentView::I_ContentView * centralView;
-            const QString *const plgName;
+            const QString plgName;
             _CustomWindow *const window;
             QList<PlgDef::ContentView::I_ContentView *> *const list;
 
         public:
-            SingalView();
-            ~SingalView();
+            DefaultSingalView();
+            ~DefaultSingalView() override;
 
             // I_PluginBase interface
         public:
-            const QString *registName();
-            PlgDef::PluginType upStreamMark();
-            QMenu *getCustomMenu();
-            void saveOperation();
+            const QString registName() override;
+            PlgDef::PluginType upStreamMark() override;
+            QMenu *getCustomMenu() override;
+            void saveOperation() override;
 
             // I_Window interface
         public:
-            PlgDef::Window::I_Window *openNewWindow(Core::WsCore *core, QString *gid);
-            QString *getGroupID();
-            void setTitle(QString *title);
-            void placeView(QString *viewTitle, PlgDef::ContentView::I_ContentView *comp);
-            void closeContentView(PlgDef::ContentView::I_ContentView *comp);
-            void service_RefreshMenuBar(PlgDef::MenuBar::I_MenuBar *bar);
-            QList<PlgDef::ContentView::I_ContentView *> * getActivedView();
+            PlgDef::Window::I_Window *openNewWindow(Core::WsCore *core, const QString gid) override;
+            const QString getGroupID() override;
+            void setTitle(const QString title) override;
+            void placeView(const QString viewTitle, PlgDef::ContentView::I_ContentView *comp) override;
+            void closeContentView(PlgDef::ContentView::I_ContentView *comp) override;
+            void service_RefreshMenuBar(PlgDef::MenuBar::I_MenuBar *bar) override;
+            QList<PlgDef::ContentView::I_ContentView *> * getActivedView() override;
 
         };
 

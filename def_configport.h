@@ -19,7 +19,7 @@ namespace PlgDef {
              * @param fPath 配置文件路径
              * @return 实例
              */
-            virtual I_ConfigPort* createNewPort(QString *const fPath)=0;
+            virtual I_ConfigPort* createNewPort(const QString fPath)=0;
 
             /**
              * @brief 获取配置条目,如果配置文件中关于此配置条目的配置结果为空，则将默认值写入配置文件
@@ -27,7 +27,7 @@ namespace PlgDef {
              * @param defaultValue 默认值
              * @return 配置的内容值
              */
-            virtual const QString * getValue(QString *const key, QString *const defaultValue)=0;
+            virtual const QString getValue(const QString key, const QString defaultValue)=0;
 
         public slots:
             /**
@@ -35,7 +35,7 @@ namespace PlgDef {
              * @param key 键名：形如“xxxx.yyyy.cccc.zzzz”
              * @param value 内容值
              */
-            virtual void setKeyValue(QString *const key, QString *const value)=0;
+            virtual void setKeyValue(const QString key, const QString value)=0;
 
 
             // I_PluginBase interface

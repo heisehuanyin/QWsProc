@@ -9,7 +9,7 @@ namespace PlgDef {
     namespace LogPort {
         namespace  {
             QString DefaultWindowType_Key = "DefaultWinType";
-            QString DefaultWindowType_Value = "SingleView";
+            QString DefaultWindowType_Value = "DefaultSingalView";
         }
 
         class I_LogPort : public I_PluginBase
@@ -25,7 +25,7 @@ namespace PlgDef {
              * @param fPath Log文件路径
              * @return 实例
              */
-            virtual I_LogPort* createNewPort(QString *const fPath)=0;
+            virtual I_LogPort* createNewPort(const QString fPath)=0;
 
 
         public slots:
@@ -34,21 +34,21 @@ namespace PlgDef {
              * @param p 信息源插件
              * @param msg 信息
              */
-            virtual void writeLog(PlgDef::I_PluginBase* p, QString *const msg)=0;
+            virtual void writeLog(PlgDef::I_PluginBase* p, const QString msg)=0;
 
             /**
              * @brief 输出错误Log信息到文件，到std::out
              * @param p 信息源插件
              * @param msg 信息
              */
-            virtual void errorLog(PlgDef::I_PluginBase* p, QString *const msg)=0;
+            virtual void errorLog(PlgDef::I_PluginBase* p, const QString msg)=0;
 
             /**
              * @brief 输出提示性信息到std::out,到文件
              * @param p 信息源插件
              * @param msg 信息
              */
-            virtual void echoLog(PlgDef::I_PluginBase* p, QString *const msg)=0;
+            virtual void echoLog(PlgDef::I_PluginBase* p, const QString msg)=0;
 
             // I_PluginBase interface
         public:

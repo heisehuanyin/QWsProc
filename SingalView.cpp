@@ -4,44 +4,43 @@ using namespace PlgDef::Window;
 namespace MBar = PlgDef::MenuBar;
 namespace CView = PlgDef::ContentView;
 
-SingalView::SingalView():I_Window (),
-    plgName(new QString("SingleView")),
+DefaultSingalView::DefaultSingalView():I_Window (),
+    plgName("DefaultSingalView"),
     window(new _CustomWindow()),
     list(new QList<PlgDef::ContentView::I_ContentView *>())
 {
 
 }
 
-SingalView::~SingalView()
+DefaultSingalView::~DefaultSingalView()
 {
-    delete this->plgName;
     delete this->window;
 }
 
-const QString *SingalView::registName()
+const QString DefaultSingalView::registName()
 {
     return this->plgName;
 }
 
 
-PlgDef::PluginType SingalView::upStreamMark()
+PlgDef::PluginType DefaultSingalView::upStreamMark()
 {
     return PlgDef::IO_NoUpStream;
 }
 
-QMenu *SingalView::getCustomMenu()
+QMenu *DefaultSingalView::getCustomMenu()
 {
     return nullptr;
 }
 
-void SingalView::saveOperation()
+void DefaultSingalView::saveOperation()
 {
     //TODO saveOperate
 }
 
-PlgDef::Window::I_Window *SingalView::openNewWindow(Core::WsCore *core, QString *gid)
+PlgDef::Window::I_Window *DefaultSingalView::openNewWindow(Core::WsCore *core, const QString gid)
 {
-    SingalView* rtn = new SingalView();
+    DefaultSingalView* rtn = new DefaultSingalView();
     rtn->core = core;
     rtn->gid = gid;
     rtn->window->show();
@@ -49,38 +48,38 @@ PlgDef::Window::I_Window *SingalView::openNewWindow(Core::WsCore *core, QString 
     return rtn;
 }
 
-QString *SingalView::getGroupID()
+const QString DefaultSingalView::getGroupID()
 {
     return this->gid;
 }
 
-void SingalView::setTitle(QString *title)
+void DefaultSingalView::setTitle(const QString title)
 {
-    this->window->setWindowTitle(*(this->plgName) + " - " + *title);
+    this->window->setWindowTitle(this->plgName + " - " + title);
 }
 
-void SingalView::placeView(QString *viewTitle, CView::I_ContentView *comp)
+void DefaultSingalView::placeView(const QString viewTitle, CView::I_ContentView *comp)
 {
     this->setTitle(viewTitle);
     this->centralView = comp;
     this->window->setCentralWidget(comp->getWidget());
 }
 
-void SingalView::closeContentView(CView::I_ContentView *comp)
+void DefaultSingalView::closeContentView(CView::I_ContentView *comp)
 {
     if(this->window->centralWidget() != comp->getWidget())
         return;
-    this->window->setWindowTitle(*(this->plgName));
+    this->window->setWindowTitle(this->plgName);
     this->centralView = nullptr;
     this->window->setCentralWidget(new QWidget(this->window));
 }
 
-void SingalView::service_RefreshMenuBar(MBar::I_MenuBar *bar)
+void DefaultSingalView::service_RefreshMenuBar(MBar::I_MenuBar *bar)
 {
     //TODO
 }
 
-QList<CView::I_ContentView *> * SingalView::getActivedView()
+QList<CView::I_ContentView *> * DefaultSingalView::getActivedView()
 {
     this->list->clear();
     this->list->append(this->centralView);

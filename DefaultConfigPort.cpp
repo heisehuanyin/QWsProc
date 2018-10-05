@@ -4,13 +4,12 @@
 using namespace PlgDef::ConfigPort;
 
 DefaultConfigPort::DefaultConfigPort():
-    pluginName(new QString("DefaultConfigPort")),
-    value_temp(nullptr)
+    pluginName("DefaultConfigPort")
 {
 
 }
 
-const QString *DefaultConfigPort::registName()
+const QString DefaultConfigPort::registName()
 {
     return this->pluginName;
 }
@@ -30,8 +29,7 @@ void DefaultConfigPort::saveOperation()
     const int indentSize = 4;
 
     if(!this->file->open(QIODevice::WriteOnly | QIODevice::Text)){
-        *this->error = "保存配置文件过程出错";
-        emit this->signal_Recieve_ProcessError(this,this->error);
+        emit this->signal_Recieve_ProcessError(this,"保存配置文件过程出错");
 
         return;
     }
@@ -42,16 +40,16 @@ void DefaultConfigPort::saveOperation()
     this->file->close();
 }
 
-I_ConfigPort *DefaultConfigPort::createNewPort(QString * const fPath)
+I_ConfigPort *DefaultConfigPort::createNewPort(const QString fPath)
 {
     DefaultConfigPort *rtn = new DefaultConfigPort();
 
-    rtn->file = new QFile(*fPath);
+    rtn->file = new QFile(fPath);
     if(! rtn->file->exists()){
         if(! rtn->file->open(QIODevice::WriteOnly | QIODevice::Text)){
-            *this->error = "新建配置文件过程出错：";
-            *this->error += *fPath;
-            emit this->signal_Recieve_ProcessError(this,this->error);
+            QString error = "新建配置文件过程出错：";
+            error += fPath;
+            emit this->signal_Recieve_ProcessError(this,error);
 
             return nullptr;
         }
@@ -64,9 +62,9 @@ I_ConfigPort *DefaultConfigPort::createNewPort(QString * const fPath)
     }
 
     if(!rtn->file->open(QIODevice::ReadOnly | QIODevice::Text)){
-        *this->error = "打不开配置文件：";
-        *this->error += *fPath;
-        emit this->signal_Recieve_ProcessError(this,this->error);
+        QString error = "打不开配置文件：";
+        error += fPath;
+        emit this->signal_Recieve_ProcessError(this,error);
 
         return nullptr;
     }
@@ -74,9 +72,9 @@ I_ConfigPort *DefaultConfigPort::createNewPort(QString * const fPath)
     rtn->doc = new QDomDocument();
     if (!rtn->doc->setContent(rtn->file)) {
         rtn->file->close();
-        *this->error = "解析XML配置文件出错:";
-        *this->error += *fPath;
-        emit this->signal_Recieve_ProcessError(this, this->error);
+        QString error = "解析XML配置文件出错:";
+        error += fPath;
+        emit this->signal_Recieve_ProcessError(this, error);
 
         return nullptr;
     }
@@ -85,10 +83,10 @@ I_ConfigPort *DefaultConfigPort::createNewPort(QString * const fPath)
     return rtn;
 }
 
-QDomElement DefaultConfigPort::searchElementAsDescription(QDomElement * elm, QString *tagName){
-    auto nodeList = elm->elementsByTagName(*tagName);
+QDomElement DefaultConfigPort::searchElementAsDescription(QDomElement * elm, const QString tagName){
+    auto nodeList = elm->elementsByTagName(tagName);
     if(nodeList.size() == 0){
-        auto newElm = this->doc->createElement(*tagName);
+        auto newElm = this->doc->createElement(tagName);
         elm->appendChild(newElm);
 
         return newElm;
@@ -98,42 +96,38 @@ QDomElement DefaultConfigPort::searchElementAsDescription(QDomElement * elm, QSt
     return target.toElement();
 }
 
-void DefaultConfigPort::setKeyValue(QString * const key, QString * const value)
+void DefaultConfigPort::setKeyValue(const QString key, const QString value)
 {
-    const QStringList list = (*key).split(".");
+    const QStringList list = key.split(".");
     QDomElement root = this->doc->documentElement();
 
     for(auto item = list.constBegin();
         item != list.constEnd();
         ++item){
         QString str(*item);
-        root =  searchElementAsDescription(&root, &str);
+        root =  searchElementAsDescription(&root, str);
     }
 
-    root.setAttribute("value", *value);
+    root.setAttribute("value", value);
 }
 
-const QString *DefaultConfigPort::getValue(QString * const key, QString * const defaultValue)
+const QString DefaultConfigPort::getValue(const QString key, const QString defaultValue)
 {
-    const QStringList list = (*key).split(".");
+    const QStringList list = key.split(".");
     QDomElement root = this->doc->documentElement();
 
     for(auto item = list.constBegin();
         item != list.constEnd();
         ++item){
         QString str(*item);
-        root =  searchElementAsDescription(&root, &str);
+        root =  searchElementAsDescription(&root, str);
     }
-    auto xval = root.attribute("value", *defaultValue);
-    if(xval == *defaultValue){
-        root.setAttribute("value", *defaultValue);
+    auto xval = root.attribute("value", defaultValue);
+    if(xval == defaultValue){
+        root.setAttribute("value", defaultValue);
     }
 
-    if(this->value_temp)
-        delete this->value_temp;
-    this->value_temp = new QString(xval);
-
-    return this->value_temp;
+    return xval;
 }
 
 
