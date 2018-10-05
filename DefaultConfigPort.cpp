@@ -1,4 +1,4 @@
-#include "DefaultConfigPort.h"
+#include "defaultconfigport.h"
 #include <iostream>
 
 using namespace PlgDef::ConfigPort;

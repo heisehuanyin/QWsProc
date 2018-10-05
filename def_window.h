@@ -3,7 +3,7 @@
 
 #include "def_contentview.h"
 #include "def_menubar.h"
-#include "WsCore.h"
+#include "wscore.h"
 
 #include <QMainWindow>
 #include <QResizeEvent>

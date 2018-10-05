@@ -1,9 +1,9 @@
 #include "def_configport.h"
 #include "def_logport.h"
 #include "def_window.h"
-#include "SingalView.h"
+#include "singalview.h"
 #include "defaultlogport.h"
-#include "DefaultConfigPort.h"
+#include "defaultconfigport.h"
 
 namespace Log = PlgDef::LogPort;
 namespace Cfg = PlgDef::ConfigPort;
@@ -35,7 +35,7 @@ void Core::WsCore::service_RegisterPlugin(PlgDef::I_PluginBase *p)
     this->manager->factory_RegisterPlugin(p);
 }
 
-void Core::WsCore::service_RefreshMenuBar(PlgDef::Window::I_Window *win)
+void Core::WsCore::service_RefreshComponents(PlgDef::Window::I_Window *win)
 {
     //TODO
 }

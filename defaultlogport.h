@@ -1,6 +1,8 @@
 #ifndef DEFAULTLOGPORT_H
 #define DEFAULTLOGPORT_H
+
 #include "def_logport.h"
+
 #include <QFile>
 #include <QTextStream>
 

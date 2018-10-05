@@ -26,23 +26,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        main.cpp \
-    SingalView.cpp \
-    DefaultLogPort.cpp \
-    WsCore.cpp \
-    DefaultConfigPort.cpp
+    defaultconfigport.cpp \
+    defaultlogport.cpp \
+    main.cpp \
+    singalview.cpp \
+    wscore.cpp
 
 HEADERS += \
-    SingalView.h \
-    DefaultLogPort.h \
-    WsCore.h \
     def_configport.h \
     def_contentview.h \
     def_logport.h \
     def_menubar.h \
     def_plugin_base.h \
     def_window.h \
-    DefaultConfigPort.h
+    defaultconfigport.h \
+    defaultlogport.h \
+    singalview.h \
+    wscore.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

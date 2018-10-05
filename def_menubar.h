@@ -14,7 +14,10 @@ namespace PlgDef{
     namespace MenuBar{
         /**
         @brief 菜单栏*/
-        class I_MenuBar:public I_PluginBase{};
+        class I_MenuBar:public I_PluginBase{
+            Q_OBJECT
+
+        };
     }
 
 

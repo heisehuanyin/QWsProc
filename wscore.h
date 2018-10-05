@@ -167,10 +167,10 @@ namespace Core {
         void service_RegisterPlugin(PlgDef::I_PluginBase *p);
 
         /**
-         * @brief 刷新指定窗口实例上的menubar
+         * @brief 更新指定窗口实例上的各种组件
          * @param win 指定窗口实例
          */
-        void service_RefreshMenuBar(PlgDef::Window::I_Window *win);
+        void service_RefreshComponents(PlgDef::Window::I_Window *win);
 
         /**
          * @brief 默认全平台保存操作

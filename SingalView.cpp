@@ -1,4 +1,4 @@
-#include "SingalView.h"
+#include "singalview.h"
 
 using namespace PlgDef::Window;
 namespace MBar = PlgDef::MenuBar;
