@@ -14,6 +14,12 @@ namespace PlgDef {
     namespace Window {
         class I_Window;
     }
+    namespace ChannelPreface {
+        class I_ChannelPreface;
+    }
+    namespace TextModel {
+        class I_TextModel;
+    }
 }
 
 
@@ -58,7 +64,7 @@ namespace Core {
          * @param pExample 插件实例
          * @return 通道id，一般是指向URL
          */
-        const QString * channel_getChannelId(PlgDef::I_PluginBase *pExample);
+        const QString channel_getChannelId(PlgDef::I_PluginBase *pExample);
 
         /**
          * @brief 通过通道id获取整条通道
@@ -74,15 +80,32 @@ namespace Core {
          * @param fPath 配置文件路径
          * @return Configport实例
          */
-        PlgDef::ConfigPort::I_ConfigPort *instance_GetConfigport(const QString fPath);
+        PlgDef::ConfigPort::I_ConfigPort *instance_GetConfigport(const QString fPath, QHash<QString,QString> argslist);
 
         /**
          * @brief 获取一个Logport实例，每次程序启动，只保留最后装载的一种Logport插件
          * @param fPath Log文件路径
          * @return Logport插件实例
          */
-        PlgDef::LogPort::I_LogPort *instance_GetLogport(const QString fPath);
+        PlgDef::LogPort::I_LogPort *instance_GetLogport(const QString fPath, QHash<QString, QString> argslist);
 
+        /**
+         * @brief 获得一个ChannelPreface实例
+         * @param filePath 向其中存储文件路径，也是通道id，也是插件实例分组id
+         * @param pjtPath 向其中存储文件属于的项目路径
+         * @return 实例
+         */
+        PlgDef::ChannelPreface::I_ChannelPreface *instance_GetChannelPreface(const QString factory_id,
+                                                                             const QString filePath, const QString pjtPath);
+
+        /**
+         * @brief 获得一个TextModel实例
+         * @param upStream 上游插件
+         * @param xargs 参数列表
+         * @return 实例
+         */
+        PlgDef::TextModel::I_TextModel *instance_GetTextModel(const QString factory_id,
+                                                              PlgDef::I_PluginBase *upStream, QHash<QString, QString> xargs);
         //UI Components
         /**
          * @brief 获取配置项设定的窗口实例一个
@@ -94,18 +117,24 @@ namespace Core {
 
         //Query Methods
         /**
+         * @brief 查询所有载入的插件
+         * @return
+         */
+        QHash<PlgDef::PluginType, QList<QPair<QString, PlgDef::PluginType>>> service_QueryFactoryList();
+
+        /**
          * @brief 通过指定typeMark，查询所有同种插件列表
          * @param typeMark 插件类别码
          * @return 信息组合
          */
-        QList<QPair<QString, PlgDef::PluginType>> * service_QueryFactoryList(PlgDef::PluginType typeMark);
+        QList<QPair<QString, PlgDef::PluginType> > service_QueryFactoryList(PlgDef::PluginType typeMark);
 
         /**
          * @brief 通过指定插件注册名，查询所有同种插件列表
          * @param pRegistName 插件注册名
          * @return 信息组合
          */
-        QList<QPair<QString, PlgDef::PluginType>> * service_QueryFactoryList(const QString pRegistName);
+        QList<QPair<QString, PlgDef::PluginType>> service_QueryFactoryList(const QString pRegistName);
 
     private:
         QHash<QString, PlgDef::I_PluginBase *> *const factories;
@@ -114,7 +143,6 @@ namespace Core {
         WsCore *const core;
         QString logportName;
         QString configportName;
-        QList<QPair<QString, PlgDef::PluginType>> *const list;
 
         /**
          * @brief 获取已经存在的插件工厂
@@ -179,10 +207,11 @@ namespace Core {
 
         /**
          * @brief 打开特定文件，如果通道中插件有ContentView类型，会自动加载到本窗口上
-         * @param fileIndicate 文件指代符
+         * @param filePath 目标文件所在路径
+         * @param prjPath 项目配置文件所在路径
          * @param win 发出请求的窗口
          */
-        void service_OpenFile(const QString filePath, PlgDef::I_PluginBase *win);
+        void service_OpenFile(const QString filePath, const QString prjPath, PlgDef::I_PluginBase *win);
 
         /**
          * @brief 获取默认的LogPort插件实例

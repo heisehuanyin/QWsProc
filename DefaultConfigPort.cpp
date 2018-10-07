@@ -3,15 +3,22 @@
 
 using namespace PlgDef::ConfigPort;
 
-DefaultConfigPort::DefaultConfigPort():
-    pluginName("DefaultConfigPort")
-{
+#define LISTITEM_TAGNAME "args"
+#define LISTITEM_KEY     "key"
+#define LISTITEM_VALUE   "value"
+#define SIMPLE_APPOINT   "specify"
+#define ENCODING_KEY     "Encoding"
 
-}
 
-const QString DefaultConfigPort::registName()
+DefaultConfigPort::DefaultConfigPort()
 {
-    return this->pluginName;
+    auto list = QTextCodec::availableCodecs();
+
+    for(auto itor = list.constBegin();
+        itor != list.constEnd();
+        ++itor){
+        this->insertEnumItem(ENCODING_KEY, *itor);
+    }
 }
 
 PlgDef::PluginType DefaultConfigPort::upStreamMark()
@@ -29,7 +36,7 @@ void DefaultConfigPort::saveOperation()
     const int indentSize = 4;
 
     if(!this->file->open(QIODevice::WriteOnly | QIODevice::Text)){
-        emit this->signal_Recieve_ProcessError(this,"保存配置文件过程出错");
+        emit this->signal_PushErrorReport(this,"保存配置文件过程出错");
 
         return;
     }
@@ -40,7 +47,8 @@ void DefaultConfigPort::saveOperation()
     this->file->close();
 }
 
-I_ConfigPort *DefaultConfigPort::createNewPort(const QString fPath)
+I_ConfigPort *DefaultConfigPort::createNewPort(Core::WsCore *core, const QString fPath,
+                                               QHash<QString, QString> argslist)
 {
     DefaultConfigPort *rtn = new DefaultConfigPort();
 
@@ -49,13 +57,20 @@ I_ConfigPort *DefaultConfigPort::createNewPort(const QString fPath)
         if(! rtn->file->open(QIODevice::WriteOnly | QIODevice::Text)){
             QString error = "新建配置文件过程出错：";
             error += fPath;
-            emit this->signal_Recieve_ProcessError(this,error);
+            emit this->signal_PushErrorReport(this,error);
 
             return nullptr;
         }
 
+        QTextCodec *codec = QTextCodec::codecForLocale();
+        auto encodeItor = argslist.find(ENCODING_KEY);
+        if(encodeItor != argslist.constEnd()){
+            codec = QTextCodec::codecForName(encodeItor.value().toUtf8());
+        }
+
         QTextStream out(rtn->file);
-        out<<"<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+        out.setCodec(codec);
+        out<<"<?xml version=\"1.0\" ?>"
              "<recordList></recordList>";
         out.flush();
         rtn->file->close();
@@ -64,7 +79,7 @@ I_ConfigPort *DefaultConfigPort::createNewPort(const QString fPath)
     if(!rtn->file->open(QIODevice::ReadOnly | QIODevice::Text)){
         QString error = "打不开配置文件：";
         error += fPath;
-        emit this->signal_Recieve_ProcessError(this,error);
+        emit this->signal_PushErrorReport(this,error);
 
         return nullptr;
     }
@@ -74,7 +89,7 @@ I_ConfigPort *DefaultConfigPort::createNewPort(const QString fPath)
         rtn->file->close();
         QString error = "解析XML配置文件出错:";
         error += fPath;
-        emit this->signal_Recieve_ProcessError(this, error);
+        emit this->signal_PushErrorReport(this, error);
 
         return nullptr;
     }
@@ -96,6 +111,66 @@ QDomElement DefaultConfigPort::searchElementAsDescription(QDomElement * elm, con
     return target.toElement();
 }
 
+const QHash<QString, QString> DefaultConfigPort::getConfigList(const QString key)
+{
+    auto rtn = QHash<QString, QString>();
+    const QStringList list = key.split(".");
+    QDomElement root = this->doc->documentElement();
+
+    for(auto item = list.constBegin();
+        item != list.constEnd();
+        ++item){
+        QString str(*item);
+        root =  searchElementAsDescription(&root, str);
+    }
+
+    for(auto oneElm = root.firstChildElement(LISTITEM_TAGNAME);
+        !oneElm.isNull();
+        oneElm = root.nextSiblingElement(LISTITEM_TAGNAME)){
+        QString key = oneElm.attribute(LISTITEM_KEY);
+        QString val = oneElm.attribute(LISTITEM_VALUE);
+        rtn.insert(key, val);
+    }
+
+    return rtn;
+}
+
+void DefaultConfigPort::setConfigList(const QString key, QHash<QString, QString> list)
+{
+    auto rtn = QHash<QString, QString>();
+    const QStringList tagList = key.split(".");
+    QDomElement root = this->doc->documentElement();
+
+    for(auto item = tagList.constBegin();
+        item != tagList.constEnd();
+        ++item){
+        QString str(*item);
+        root =  searchElementAsDescription(&root, str);
+    }
+
+    for(auto oneElm = root.firstChildElement(LISTITEM_TAGNAME);
+        !oneElm.isNull();
+        oneElm = root.nextSiblingElement(LISTITEM_TAGNAME)){
+
+        QString key = oneElm.attribute(LISTITEM_KEY);
+
+        auto itor = list.find(key);
+        if(itor != list.constEnd()){
+            oneElm.setAttribute(LISTITEM_VALUE, itor.value());
+            list.remove(key);
+        }
+    }
+
+    for(auto itor = list.constBegin();
+        itor != list.constEnd();
+        ++itor){
+        auto item = this->doc->createElement(LISTITEM_TAGNAME);
+        item.setAttribute(LISTITEM_KEY, itor.key());
+        item.setAttribute(LISTITEM_VALUE, itor.value());
+        root.appendChild(item);
+    }
+}
+
 void DefaultConfigPort::setKeyValue(const QString key, const QString value)
 {
     const QStringList list = key.split(".");
@@ -108,7 +183,7 @@ void DefaultConfigPort::setKeyValue(const QString key, const QString value)
         root =  searchElementAsDescription(&root, str);
     }
 
-    root.setAttribute("value", value);
+    root.setAttribute(SIMPLE_APPOINT, value);
 }
 
 const QString DefaultConfigPort::getValue(const QString key, const QString defaultValue)
@@ -122,9 +197,12 @@ const QString DefaultConfigPort::getValue(const QString key, const QString defau
         QString str(*item);
         root =  searchElementAsDescription(&root, str);
     }
-    auto xval = root.attribute("value", defaultValue);
-    if(xval == defaultValue){
-        root.setAttribute("value", defaultValue);
+    auto xval = root.attribute(SIMPLE_APPOINT);
+    if(xval == QString()){
+        if(defaultValue != QString()){
+            root.setAttribute(SIMPLE_APPOINT, defaultValue);
+            xval = defaultValue;
+        }
     }
 
     return xval;

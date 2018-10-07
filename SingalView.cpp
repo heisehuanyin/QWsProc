@@ -41,11 +41,12 @@ void DefaultSingalView::saveOperation()
     //TODO saveOperate
 }
 
-PlgDef::Window::I_Window *DefaultSingalView::openNewWindow(Core::WsCore *core, const QString gid)
+PlgDef::Window::I_Window *DefaultSingalView::openNewWindow(Core::WsCore *core, const QString gid, int width, int height)
 {
     DefaultSingalView* rtn = new DefaultSingalView();
     rtn->core = core;
     rtn->gid = gid;
+    rtn->window->resize(width, height);
     rtn->window->show();
 
     return rtn;

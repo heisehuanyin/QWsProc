@@ -26,7 +26,7 @@ namespace PlgDef {
 
             // I_Window interface
         public:
-            PlgDef::Window::I_Window *openNewWindow(Core::WsCore *core, const QString gid) override;
+            PlgDef::Window::I_Window *openNewWindow(Core::WsCore *core, const QString gid, int width, int height) override;
             const QString getGroupID() override;
             void setTitle(const QString title) override;
             void placeView(const QString viewTitle, PlgDef::ContentView::I_ContentView *comp) override;

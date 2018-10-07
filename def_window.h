@@ -56,7 +56,7 @@ namespace PlgDef {
              * @param gid GroupId
              * @return 新实例
              */
-            virtual I_Window* openNewWindow(Core::WsCore *core, const QString gid) = 0;
+            virtual I_Window* openNewWindow(Core::WsCore *core, const QString gid, int width, int height) = 0;
 
             /**
              * @brief 获取本实例绑定的GroupId

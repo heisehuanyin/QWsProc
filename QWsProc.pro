@@ -30,7 +30,8 @@ SOURCES += \
     defaultlogport.cpp \
     main.cpp \
     singalview.cpp \
-    wscore.cpp
+    wscore.cpp \
+    defaulttextmodel.cpp
 
 HEADERS += \
     def_configport.h \
@@ -42,7 +43,10 @@ HEADERS += \
     defaultconfigport.h \
     defaultlogport.h \
     singalview.h \
-    wscore.h
+    wscore.h \
+    def_channelpreface.h \
+    def_textmodel.h \
+    defaulttextmodel.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

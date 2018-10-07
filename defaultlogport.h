@@ -15,6 +15,7 @@ namespace PlgDef {
             const QString pluginName;
             QFile * logPort;
             QTextStream * logStream;
+            Core::WsCore *core;
 
         public:
             DefaultLogPort();
@@ -29,7 +30,8 @@ namespace PlgDef {
 
             // I_LogPort interface
         public:
-            virtual I_LogPort *createNewPort(const QString fPath) override;
+            virtual I_LogPort *createNewPort(Core::WsCore *core, const QString fPath,
+                                             QHash<QString, QString> argslist) override;
             virtual void writeLog(I_PluginBase *p, const QString msg) override;
             virtual void errorLog(I_PluginBase *p, const QString msg) override;
             virtual void echoLog(I_PluginBase *p, const QString msg) override;

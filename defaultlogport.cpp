@@ -1,12 +1,21 @@
 #include "defaultlogport.h"
+#include <QTextCodec>
 #include <iostream>
 
 using namespace PlgDef::LogPort;
 
+#define ENCODING "Encoding"
+
 DefaultLogPort::DefaultLogPort():
     pluginName("DefaultLogPort")
 {
+    auto list = QTextCodec::availableCodecs();
 
+    for(auto itor = list.constBegin();
+        itor != list.constEnd();
+        ++itor){
+        this->insertEnumItem(ENCODING, *itor);
+    }
 }
 
 PlgDef::LogPort::DefaultLogPort::~DefaultLogPort()
@@ -36,17 +45,27 @@ void PlgDef::LogPort::DefaultLogPort::saveOperation()
     this->logStream->flush();
 }
 
-I_LogPort *PlgDef::LogPort::DefaultLogPort::createNewPort(const QString fPath)
+I_LogPort *PlgDef::LogPort::DefaultLogPort::createNewPort(Core::WsCore *core, const QString fPath,
+                                                          QHash<QString, QString> argslist)
 {
     DefaultLogPort* rtn = new DefaultLogPort();
+    rtn->core = core;
     rtn->logPort = new QFile(fPath);
     if(! rtn->logPort->open(QIODevice::WriteOnly|QIODevice::Text)){
 
-        emit this->signal_Recieve_ProcessError(this, "打开Log文件过程中出现错误");
+        emit this->signal_PushErrorReport(this, "打开Log文件过程中出现错误");
 
         return nullptr;
     }
+    QTextCodec *codec = QTextCodec::codecForLocale();
+
+    auto valptr = argslist.find(ENCODING);
+    if(valptr != argslist.constEnd()){
+        auto bytec = valptr.value().toUtf8();
+        codec = QTextCodec::codecForName(bytec);
+    }
     rtn->logStream = new QTextStream(rtn->logPort);
+    rtn->logStream->setCodec(codec);
 
     return rtn;
 }
@@ -54,12 +73,12 @@ I_LogPort *PlgDef::LogPort::DefaultLogPort::createNewPort(const QString fPath)
 void PlgDef::LogPort::DefaultLogPort::writeLog(PlgDef::I_PluginBase *p, const QString msg)
 {
     QString msgout = "Log::";
-    if(p==nullptr)
+    if(p == nullptr)
         msgout += "MainFramework";
     else
         msgout += p->registName();
 
-    *this->logStream <<msgout <<":"<<msg <<"\n";
+    *this->logStream <<msgout <<":"<<msg << endl;
 }
 
 void PlgDef::LogPort::DefaultLogPort::errorLog(PlgDef::I_PluginBase *p, const QString msg)
@@ -71,8 +90,8 @@ void PlgDef::LogPort::DefaultLogPort::errorLog(PlgDef::I_PluginBase *p, const QS
         msgout += p->registName();
 
 
-    *this->logStream <<msgout <<":"<<msg;
-    std::cout<<msg.toStdString() <<std::endl;
+    std::cout<<msg.toLocal8Bit().toStdString() <<std::endl;
+    *this->logStream <<msgout <<":"<< endl;
 }
 
 void PlgDef::LogPort::DefaultLogPort::echoLog(PlgDef::I_PluginBase *p, const QString msg)
@@ -84,6 +103,6 @@ void PlgDef::LogPort::DefaultLogPort::echoLog(PlgDef::I_PluginBase *p, const QSt
         msgout += p->registName();
 
 
-    *this->logStream <<msgout <<":" <<msg <<"\n";
-    std::cout<<msg.toStdString() <<std::endl;
+    std::cout<<msg.toLocal8Bit().toStdString() <<std::endl;
+    *this->logStream <<msgout <<":" <<msg << endl;
 }

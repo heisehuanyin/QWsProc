@@ -1,6 +1,7 @@
 #ifndef DEFLOGPORT_H
 #define DEFLOGPORT_H
 #include "def_plugin_base.h"
+#include "wscore.h"
 
 #include <exception>
 
@@ -17,11 +18,14 @@ namespace PlgDef {
             virtual ~I_LogPort() override {}
 
             /**
-             * @brief 创建一个Log输出实例
-             * @param fPath Log文件路径
+             * @brief 创建一个新的配置文件访问接口
+             * @param core 核心调度模块
+             * @param fPath 配置文件路径
+             * @param argslist 参数列表
              * @return 实例
              */
-            virtual I_LogPort* createNewPort(const QString fPath)=0;
+            virtual I_LogPort* createNewPort(Core::WsCore *core, const QString fPath,
+                                             QHash<QString, QString> argslist)=0;
 
 
         public slots:
