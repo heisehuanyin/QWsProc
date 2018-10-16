@@ -14,8 +14,8 @@ namespace PlgDef {
             Q_OBJECT
 
         public:
-            I_LogPort(){}
-            virtual ~I_LogPort() override {}
+            I_LogPort();
+            virtual ~I_LogPort() override;
 
             /**
              * @brief 创建一个新的配置文件访问接口
@@ -52,9 +52,7 @@ namespace PlgDef {
 
             // I_PluginBase interface
         public:
-            virtual PluginType pluginMark() override final{
-                return PlgDef::Service_LogPort;
-            }
+            virtual PluginType pluginMark() override final;
         };
     }
 

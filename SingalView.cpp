@@ -25,12 +25,6 @@ const QString DefaultSingalView::registName()
     return this->plgName;
 }
 
-
-PlgDef::PluginType DefaultSingalView::upStreamMark()
-{
-    return PlgDef::IO_NoUpStream;
-}
-
 QMenu *DefaultSingalView::getCustomMenu()
 {
     return nullptr;
@@ -69,18 +63,9 @@ void DefaultSingalView::placeView(const QString viewTitle, CView::I_ContentView 
     this->window->setCentralWidget(comp->getWidget());
 }
 
-void DefaultSingalView::closeContentView(CView::I_ContentView *comp)
+void DefaultSingalView::service_ReplaceMenuBar(QMenuBar *bar)
 {
-    if(this->window->centralWidget() != comp->getWidget())
-        return;
-    this->window->setWindowTitle(this->plgName);
-    this->centralView = nullptr;
-    this->window->setCentralWidget(new QWidget(this->window));
-}
-
-void DefaultSingalView::service_RefreshMenuBar(MBar::I_MenuBar *bar)
-{
-    //TODO
+    this->window->setMenuBar(bar);
 }
 
 QList<CView::I_ContentView *> * DefaultSingalView::getActivedView()
@@ -93,6 +78,16 @@ QList<CView::I_ContentView *> * DefaultSingalView::getActivedView()
 void DefaultSingalView::setSize(int width, int height)
 {
     this->window->resize(width, height);
+}
+
+QWidget *DefaultSingalView::getWidget()
+{
+    return this->window;
+}
+
+QList<PlgDef::ContentView::I_ContentView *> *DefaultSingalView::getAllView()
+{
+    return this->getActivedView();
 }
 
 

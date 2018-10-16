@@ -3,7 +3,7 @@
 
 using namespace PlgDef::ConfigPort;
 
-#define LISTITEM_TAGNAME "args"
+#define LISTITEM_TAGNAME "____args"
 #define LISTITEM_KEY     "key"
 #define LISTITEM_VALUE   "value"
 #define SIMPLE_APPOINT   "specify"

@@ -24,19 +24,13 @@ namespace PlgDef {
             Q_OBJECT
 
         public:
-            _CustomWindow(QWidget *parent = nullptr):
-                QMainWindow(parent)
-            {}
-            ~_CustomWindow() override {}
+            _CustomWindow(QWidget *parent = nullptr);
+            ~_CustomWindow() override;
         signals:
             void resizeWindow(int width, int height);
 
         protected:
-            void resizeEvent(QResizeEvent *event) override {
-                this->QMainWindow::resizeEvent(event);
-                auto size = event->size();
-                emit this->resizeWindow(size.width(), size.height());
-            }
+            void resizeEvent(QResizeEvent *event) override;
         };
 
         /**
@@ -46,10 +40,8 @@ namespace PlgDef {
             Q_OBJECT
 
         public:
-            I_Window()
-            {
-            }
-            virtual ~I_Window() override {}
+            I_Window();
+            virtual ~I_Window() override;
             /**
              * @brief 创建一个新的Window实例,与原本的实例并无任何联系
              * @param core 核心调度模块
@@ -64,6 +56,8 @@ namespace PlgDef {
              */
             virtual const QString getGroupID() = 0;
 
+            virtual QWidget* getWidget()=0;
+
             /**
              * @brief 将ContentView放置在本窗体上
              * @param viewTitle 视图标题
@@ -72,22 +66,22 @@ namespace PlgDef {
             virtual void placeView(const QString viewTitle, ContentView::I_ContentView *comp) = 0;
 
             /**
-             * @brief 关闭指定ContentView
-             * @param comp 指定组件
-             */
-            virtual void closeContentView(ContentView::I_ContentView *comp) = 0;
-
-            /**
              * @brief 利用传入的MenuBar刷新本窗口的菜单栏及其组件
              * @param bar 菜单栏组件
              */
-            virtual void service_RefreshMenuBar(MenuBar::I_MenuBar *bar) = 0;
+            virtual void service_ReplaceMenuBar(QMenuBar *bar) = 0;
 
             /**
-             * @brief 获取本窗口中的活动视图
+             * @brief 获取本窗口中的活动视图，也就是活动视图，当存在多个分隔区域的时候，返回每个区域的活动视图,基本被用作刷新菜单栏
              * @param views 存取视图容器
              */
             virtual QList<ContentView::I_ContentView *> * getActivedView() = 0;
+
+            /**
+             * @brief 获取布局在本窗口上的所有视图清单，基本被用作刷新视图菜单，打印菜单
+             * @return 清单
+             */
+            virtual QList<ContentView::I_ContentView *> * getAllView() = 0;
         signals:
             /**
              * @brief 当窗口尺寸发生变化，发送该信号
@@ -113,9 +107,11 @@ namespace PlgDef {
 
             // I_PluginBase interface
         public:
-            virtual PluginType pluginMark() override final{
-                return PlgDef::UI_Window;
-            }
+            virtual PluginType pluginMark() override final;
+
+            // I_PluginBase interface
+        public:
+            virtual PluginType upStreamMark() override final;
         };
 
 

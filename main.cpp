@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    WsCore *app = new WsCore();
+    WsCore *app = new WsCore(&a);
 
     if(argc == 2 && QString("-print") == argv[1]){
         app->service_OpenSilentModel();
@@ -21,22 +21,27 @@ int main(int argc, char *argv[])
         auto lists = m->service_QueryFactoryList();
         __printPluginList(lists);
 
+        app->slot_SaveOperation();
         return 0;
     }
 
     if(argc == 2 && QString("-test") == argv[1]){
         app->service_OpenSilentModel();
         app->test_InnerTest();
-        app->service_SaveOperation();
+        app->slot_SaveOperation();
 
         return 0;
     }
 
 
-    app->service_OpenGraphicsModel("Default");
+    app->service_OpenGraphicsModel();
+
+    if(argc > 2 && QString(argv[1]).indexOf('s') != -1){
+        app->operate_OpenFile(argv[2]);
+    }
 
     int rtnum = a.exec();
-    app->service_SaveOperation();
+    app->slot_SaveOperation();
     return rtnum;
 }
 

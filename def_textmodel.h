@@ -9,8 +9,8 @@ namespace PlgDef {
         {
             Q_OBJECT
         public:
-            I_TextModel(){}
-            virtual ~I_TextModel() override {}
+            I_TextModel();
+            virtual ~I_TextModel() override;
 
             /**
              * @brief 获取一个新的TextModel
@@ -20,6 +20,12 @@ namespace PlgDef {
              * @return 新实例
              */
             virtual I_TextModel* openNewTextModel(Core::WsCore *core, PlgDef::I_PluginBase *upStream, QHash<QString, QString> xargs) = 0;
+
+            /**
+             * @brief 重新载入所有Text内容，该内容是无格式的纯文本。此操作后，本组件内部的所有内容完全刷新，之前状态完全作废
+             * @param text 目标文字
+             */
+            virtual void reLoadAllText(QString text)=0;
 
             /**
              * @brief 获取内容行总数
@@ -58,9 +64,7 @@ namespace PlgDef {
 
             // I_PluginBase interface
         public:
-            virtual PluginType pluginMark() override final {
-                return PlgDef::IO_TextModel;
-            }
+            virtual PluginType pluginMark() override final;
         };
     }
 }

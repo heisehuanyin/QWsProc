@@ -91,7 +91,7 @@ void PlgDef::LogPort::DefaultLogPort::errorLog(PlgDef::I_PluginBase *p, const QS
 
 
     std::cout<<msg.toLocal8Bit().toStdString() <<std::endl;
-    *this->logStream <<msgout <<":"<< endl;
+    *this->logStream <<msgout <<":"<<msg << endl;
 }
 
 void PlgDef::LogPort::DefaultLogPort::echoLog(PlgDef::I_PluginBase *p, const QString msg)

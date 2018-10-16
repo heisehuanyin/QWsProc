@@ -2,7 +2,9 @@
 #define WSCORE_H
 
 #include "def_plugin_base.h"
+#include "pluginlistnode.h"
 #include <QMessageBox>
+#include <QApplication>
 
 namespace PlgDef {
     namespace ConfigPort {
@@ -19,6 +21,12 @@ namespace PlgDef {
     }
     namespace TextModel {
         class I_TextModel;
+    }
+    namespace ContentView {
+        class I_ContentView;
+    }
+    namespace MenuBar {
+        class I_MenuBar;
     }
 }
 
@@ -45,7 +53,11 @@ namespace Core {
          * @brief 全局保存操作
          */
         void operate_SaveOperation();
-        void operate_BuildChannel(QString *const cStr, const QString cId);
+        void operate_BuildChannel(const QString filepath,
+                                  const QString projectpath,
+                                  PluginListNode * plglist,
+                                  PlgDef::I_PluginBase* upStream,
+                                  PlgDef::Window::I_Window* win);
 
         /**
          * @brief 保存特定通道所有插件内容
@@ -100,20 +112,33 @@ namespace Core {
 
         /**
          * @brief 获得一个TextModel实例
+         * @param factory_id 插件注册名
          * @param upStream 上游插件
          * @param xargs 参数列表
          * @return 实例
          */
         PlgDef::TextModel::I_TextModel *instance_GetTextModel(const QString factory_id,
                                                               PlgDef::I_PluginBase *upStream, QHash<QString, QString> xargs);
+
+        /**
+         * @brief 获取一个内容视图实例
+         * @param factory_id
+         * @param upStream
+         * @param xargs
+         * @return
+         */
+        PlgDef::ContentView::I_ContentView* instance_GetContentView(PlgDef::Window::I_Window * win, const QString factory_id,
+                                                                    PlgDef::I_PluginBase *upStream, QHash<QString, QString> xargs);
         //UI Components
         /**
          * @brief 获取配置项设定的窗口实例一个
          * @param gId GroupId
          * @return 实例
          */
-        PlgDef::I_PluginBase * instance_GetWindowInstance(const QString gId);
-        PlgDef::I_PluginBase * instance_GetMenuBarInstance(const QString gId);
+        PlgDef::Window::I_Window * instance_GetWindowInstance(const QString gId);
+
+
+        PlgDef::MenuBar::I_MenuBar * instance_GetMenuBarInstance(const QString gId);
 
         //Query Methods
         /**
@@ -179,15 +204,10 @@ namespace Core {
         Q_OBJECT
 
     public:
-        WsCore();
+        WsCore(QApplication *appi);
         ~WsCore();
 
-        /**
-         * @brief 获取插件管理器
-         * @return 插件管理器实例
-         */
-        PluginManager* service_getManager();
-
+        PluginManager *service_getManager();
         /**
          * @brief 注册插件工厂便捷接口
          * @param p 插件实例
@@ -200,10 +220,6 @@ namespace Core {
          */
         void service_RefreshComponents(PlgDef::Window::I_Window *win);
 
-        /**
-         * @brief 默认全平台保存操作
-         */
-        void service_SaveOperation();
 
         /**
          * @brief 打开特定文件，如果通道中插件有ContentView类型，会自动加载到本窗口上
@@ -211,7 +227,21 @@ namespace Core {
          * @param prjPath 项目配置文件所在路径
          * @param win 发出请求的窗口
          */
-        void service_OpenFile(const QString filePath, const QString prjPath, PlgDef::I_PluginBase *win);
+        void operate_OpenFile(const QString filePath, PlgDef::Window::I_Window *win = nullptr, const QString prjPath = QString());
+
+
+        /**
+         * @brief 关闭指定ContentView
+         * @param comp 指定组件
+         * @param wetherSave 是否保持选项
+         */
+        void operate_CloseContentView(PlgDef::ContentView::I_ContentView *comp, bool wetherSave=true);
+        /**
+         * @brief 关闭指定ContentView
+         * @param channelid 通道id
+         * @param wetherSave 是否保存插件内容
+         */
+        void operate_CloseContentView(QString channelid, bool wetherSave = true);
 
         /**
          * @brief 获取默认的LogPort插件实例
@@ -231,23 +261,129 @@ namespace Core {
         void service_OpenSilentModel();
 
         /**
-         * @brief 打开图形模式，所有操作可以通过图形界面进行操作
-         * @param groupId 插件实例注册id
+         * @brief 打开图形模式，所有操作可以通过图形界面进行操作，groupid默认值为QString()
+         * @param groupId 插件实例注册id,默认值为QString()
          */
-        void service_OpenGraphicsModel(const QString groupId);
+        void service_OpenGraphicsModel(const QString groupId = QString());
+
 
         void test_InnerTest();
 
+        /**
+         * @brief 获取本文件所属项目的配置端口
+         * @param p 调用插件
+         * @return 端口
+         */
+        PlgDef::ConfigPort::I_ConfigPort* getProjectConfigPort(PlgDef::I_PluginBase *p);
+
+        /**
+         * @brief 弹出软件配置面板，可以处理项目配置
+         * @param groupId 窗口的groupid码
+         * @param customTarget 目标配置端口
+         */
+        void customPane4ConfigPort(QString groupId, PlgDef::ConfigPort::I_ConfigPort * customTarget = nullptr);
+
+        QString service_Proc4Suffix(QString fullFilePath);
+        QString service_ProcFilePath(QString fullFilePath, QString pjtFullFilePath);
+
+        /**
+         * @brief 获取插件定义链，如果该配置端口中无定义，返回QString()
+         * @param keyStr 索引定义关键字符串,首先经过去除非法字符处理，又经过编码处理后的“文件路径”、“后缀名”、“全局默认键值”
+         * @param cfgPort 配置端口
+         * @param nodelist 返回的插件定义链
+         * @return 插件定义字符串----主编辑插件链
+         */
+        QString service_getPluginlistdefAtCfgport(QString keyStr, PlgDef::ConfigPort::I_ConfigPort* cfgPort, PluginListNode **nodelist);
+
+        /**
+         * @brief 向指定配置端口写入插件定义链条
+         * @param nodelist 处理链条定义
+         * @param keyStr 索引关键键名
+         * @param cfgPort 指定配置端口
+         */
+        void service_setPluginlistdefAtCfgport(PluginListNode *nodelist, QString keyStr, PlgDef::ConfigPort::I_ConfigPort* cfgPort);
+
     public slots:
-        void slot_Recieve_ProcessError(PlgDef::I_PluginBase *const res, const QString msg);
+        /**
+         * @brief 接收软件产生的错误信息，并用弹框的方式提醒使用者，并记录
+         * @param res 报告消息的插件指针
+         * @param msg 具体消息内容
+         * @param ignoreAllows 是否允许使用者忽略
+         */
+        void slot_Recieve_ProcessError(PlgDef::I_PluginBase *const res, const QString msg, bool ignoreAllows = false);
+
+        /**
+         * @brief 默认全平台保存操作
+         */
+        void slot_SaveOperation();
+
+
 
     private:
-        void operate_LoadAllPlugins();
-        void operate_InitDefaultPlugins();
-
         const QString DefaultLogpath;
         const QString DefaultConfigpath;
         PluginManager *const manager;
+        QApplication *const app;
+
+
+        /**
+         * @brief 载入所有插件
+         */
+        void operate_LoadAllPlugins();
+        /**
+         * @brief 初始化系统默认插件
+         */
+        void operate_InitDefaultPlugins();
+        /**
+         * @brief 核查环境信息
+         */
+        void service_EnvironmentCheck();
+        /**
+         * @brief 根据打开文档路径获取关联项目配置端口
+         * @param filePath 打开的文档路径
+         * @return 配置端口实例
+         */
+        PlgDef::ConfigPort::I_ConfigPort* getProjectConfigPort(QString filePath);
+
+        enum ProcLocation{
+            fileName,
+            suffix,
+            pjtCfg,
+            g_suffix,
+            g_Cfg,
+        };
+        /**
+         * @brief 获得指定的文件的解析插件定义列表，包括插件组合方式和参数列表
+         * @param frameConfig 软件默认主框架配置接口
+         * @param projectConfig 文件项目配置接口
+         * @param filePath 指定文件
+         * @return 插件定义列表示例，记得删除该实例
+         */
+        PluginListNode* getAppointedPluginList(PlgDef::ConfigPort::I_ConfigPort *frameConfig,
+                                               PlgDef::ConfigPort::I_ConfigPort *projectConfig,
+                                               QString filePath);
+
+        Core::PluginListNode* buildPluginList(QString keyExport,
+                                              QString procdef,
+                                              PlgDef::ConfigPort::I_ConfigPort* pjtCfg);
+    private slots:
+        //File
+        void slot_OpenFileGloble();
+        void slot_NewFileGloble(QAction* act);
+        void slot_PrintGloble(QAction* act);
+        void slot_CloseFileGloble(QAction* act);
+        //Views
+        void slot_ViewChanges(QAction* act);
+        //Preference
+        void slot_MainConfigPanel();
+        void slot_PluginManager();
+        void slot_ProjectConfig();
+        void slot_DocumentConfig();
+        //Help
+        void slot_SoftwareAbout();
+        void slot_HelpContent();
+        void slot_ReportBugs();
+        void slot_SoftwareUpdate();
     };
 }
 

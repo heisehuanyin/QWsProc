@@ -20,7 +20,6 @@ namespace PlgDef {
             // I_PluginBase interface
         public:
             const QString registName() override;
-            PlgDef::PluginType upStreamMark() override;
             QMenu *getCustomMenu() override;
             void saveOperation() override;
 
@@ -30,8 +29,7 @@ namespace PlgDef {
             const QString getGroupID() override;
             void setTitle(const QString title) override;
             void placeView(const QString viewTitle, PlgDef::ContentView::I_ContentView *comp) override;
-            void closeContentView(PlgDef::ContentView::I_ContentView *comp) override;
-            void service_RefreshMenuBar(PlgDef::MenuBar::I_MenuBar *bar) override;
+            void service_ReplaceMenuBar(QMenuBar *bar) override;
             QList<PlgDef::ContentView::I_ContentView *> * getActivedView() override;
             virtual void setSize(int width, int height) override;
 
@@ -47,6 +45,14 @@ namespace PlgDef {
             void receiveWindowResize(int width, int height){
                 emit this->signal_resizeWindow(this->gid, width, height);
             }
+
+            // I_Window interface
+        public:
+            virtual QWidget *getWidget() override;
+
+            // I_Window interface
+        public:
+            virtual QList<ContentView::I_ContentView *> *getAllView() override;
         };
 
     }

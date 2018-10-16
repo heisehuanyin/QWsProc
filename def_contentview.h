@@ -2,6 +2,7 @@
 #define DEFCONTENTVIEW_H
 
 #include "def_plugin_base.h"
+#include "wscore.h"
 
 
 
@@ -12,11 +13,31 @@ namespace PlgDef {
     namespace ContentView {
         /**
         @brief 内容面板*/
-        class I_ContentView: public I_PluginBase{
+        class I_ContentView: public I_PluginBase
+        {
+            Q_OBJECT
         public:
+            I_ContentView();
+            virtual ~I_ContentView() override;
+
+            /**
+             * @brief 创建一个新的内容视图实例
+             * @param core 调度核心，提供交互接口
+             * @param upStream 上游模块，提供内容
+             * @param xargs 参数列表，如果提供的话
+             * @return 新实例
+             */
+            virtual I_ContentView* createNewContentView(Core::WsCore *core, PlgDef::I_PluginBase *upStream,
+                                                        QHash<QString,QString> xargs, const QString groupID)=0;
 
             virtual QWidget* getWidget() = 0;
+            virtual QString getGroupId()=0;
 
+
+
+            // I_PluginBase interface
+        public:
+            virtual PluginType pluginMark() override final;
         };
     }
 }

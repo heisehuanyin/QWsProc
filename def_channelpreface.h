@@ -17,42 +17,21 @@ namespace PlgDef {
 
             // I_PluginBase interface
         public:
-            I_ChannelPreface():
-                plgName("ChannelPreface")
-            {}
-            virtual ~I_ChannelPreface() override
-            {}
+            I_ChannelPreface();
+            virtual ~I_ChannelPreface() override;
 
-            virtual I_ChannelPreface* createNewChannelPreface(Core::WsCore * core, const QString filePath, const QString pjtPath){
-                auto rtn = new I_ChannelPreface();
+            virtual I_ChannelPreface* createNewChannelPreface(Core::WsCore * core,
+                                                              const QString filePath,
+                                                              const QString pjtPath);
 
-                rtn->filePath = filePath;
-                rtn->core = core;
-                rtn->pjtPath = pjtPath;
+            virtual QString getProjectPath();
 
-                return rtn;
-            }
+            virtual QString getFilePath();
 
-            virtual QString getProjectPath(){
-                return this->pjtPath;
-            }
-
-            virtual QString getFilePath(){
-                return this->filePath;
-            }
-
-            virtual const QString registName() override{
-                return this->plgName;
-            }
-            virtual PluginType pluginMark() override final{
-                return PlgDef::IO_ChannelPreface;
-            }
-            virtual PluginType upStreamMark() override final{
-                return PlgDef::IO_NoUpStream;
-            }
-            virtual QMenu *getCustomMenu() override{
-                return nullptr;
-            }
+            virtual const QString registName() override;
+            virtual PluginType pluginMark() override final;
+            virtual PluginType upStreamMark() override final;
+            virtual QMenu *getCustomMenu() override;
             virtual void saveOperation() override
             {}
         };

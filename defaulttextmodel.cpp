@@ -101,11 +101,23 @@ void DefaultTextModel::insertLineAt(int row, const QString content)
 void DefaultTextModel::removeLines(int begin, int offset)
 {
     if(offset == -1){
-        offset = this->contents.size() -1 - begin;
+        offset = this->contents.size() - begin;
     }
 
     for(int i=0; i < offset; ++i){
-        this->contents.removeAt(begin+i);
+        this->contents.removeAt(begin);
+    }
+}
+
+void DefaultTextModel::reLoadAllText(QString text)
+{
+    QStringList list = text.split("\n");
+    this->removeLines(0);
+    for(auto itor=list.constBegin();
+        itor != list.constEnd();
+        ++itor){
+        auto x = *itor;
+        this->insertLineAt(this->getRowsCount(), x);
     }
 }
 

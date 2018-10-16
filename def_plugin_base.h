@@ -10,6 +10,7 @@ namespace PlgDef{
         UI_StateBar,
         UI_Window,
         UI_ContentView,
+        UI_FloatPanel,
 
         IO_NoUpStream,
         IO_ChannelPreface,
@@ -30,10 +31,8 @@ namespace PlgDef{
         Q_OBJECT
 
     public:
-        I_PluginBase():
-            argsList(QHash<QString, QHash<QString, QString>>())
-        {}
-        virtual ~I_PluginBase(){}
+        I_PluginBase();
+        virtual ~I_PluginBase();
 
         /**
          * @brief 插件注册名称，不可重复
@@ -68,9 +67,7 @@ namespace PlgDef{
          * @brief 获取插件参数列表<argsName, <key, val>>,key=["type","1","2","3",...],二级列表中type的值直接关联ArgsType类型
          * @return 返回的插件参数列表
          */
-        QHash<QString, QHash<QString, QString>> getArgsList(){
-            return this->argsList;
-        }
+        QHash<QString, QHash<QString, QString>> getArgsList();
 
         enum ArgsType{
             ENUM_ITEM,
@@ -83,36 +80,14 @@ namespace PlgDef{
          * @param argsName 参数名
          * @param typeItem 参数类型
          */
-        void defineArgs(const QString argsName, ArgsType typeItem){
-            QString typeNum = QString("%1").arg(typeItem);
-            auto tempHash = QHash<QString,QString>();
-            tempHash.insert("type",typeNum);
-            this->argsList.insert(argsName,tempHash);
-        }
+        void defineArgs(const QString argsName, ArgsType typeItem);
 
         /**
          * @brief 向指定枚举选项参数中添加枚举项目，若该参数已经定义且本非EnumItem类型，则报错，否则添加入枚举项目
          * @param argsName 参数名
          * @param enumValue 可选枚举项目值
          */
-        void insertEnumItem(const QString argsName, const QString enumValue){
-            auto temp = this->argsList.find(argsName);
-            if(temp == this->argsList.constEnd()){
-                this->defineArgs(argsName,ArgsType::ENUM_ITEM);
-                temp = this->argsList.find(argsName);
-            }
-            auto &t_def = temp.value();
-            auto t_val = t_def.find("type");
-            if(t_val.value() != QString("%1").arg(ArgsType::ENUM_ITEM)){
-                QString msg = "重复定义参数：";
-                msg += argsName;
-                msg += ",插件试图修改此参数为EnumItem类型，故报错。";
-
-                emit this->signal_PushErrorReport(this, msg);
-            }
-            auto index = QString("%1").arg(t_def.size());
-            t_def.insert(index, enumValue);
-        }
+        void insertEnumItem(const QString argsName, const QString enumValue);
 
     private:
         QHash<QString, QHash<QString, QString>> argsList;
@@ -123,7 +98,7 @@ namespace PlgDef{
          * @param resp 发生问题的插件
          * @param msg 错误相关信息
          */
-        void signal_PushErrorReport(PlgDef::I_PluginBase *const resp, const QString msg);
+        void signal_PushErrorReport(PlgDef::I_PluginBase *const resp, const QString msg, bool ignoreAllows = false);
     };
 }
 

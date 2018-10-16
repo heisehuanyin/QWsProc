@@ -28,25 +28,41 @@ CONFIG += c++11
 SOURCES += \
     defaultconfigport.cpp \
     defaultlogport.cpp \
+    defaulttextmodel.cpp \
     main.cpp \
+    plaintextview.cpp \
     singalview.cpp \
     wscore.cpp \
-    defaulttextmodel.cpp
+    def_configport.cpp \
+    def_channelpreface.cpp \
+    def_contentview.cpp \
+    def_logport.cpp \
+    def_plugin_base.cpp \
+    def_textmodel.cpp \
+    def_window.cpp \
+    pluginlistnode.cpp \
+    customdialog.cpp \
+    defaultmenubar.cpp \
+    def_menubar.cpp
 
 HEADERS += \
+    def_channelpreface.h \
     def_configport.h \
     def_contentview.h \
     def_logport.h \
     def_menubar.h \
     def_plugin_base.h \
+    def_textmodel.h \
     def_window.h \
     defaultconfigport.h \
     defaultlogport.h \
+    defaulttextmodel.h \
+    plaintextview.h \
     singalview.h \
     wscore.h \
-    def_channelpreface.h \
-    def_textmodel.h \
-    defaulttextmodel.h
+    pluginlistnode.h \
+    customdialog.h \
+    defaultmenubar.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

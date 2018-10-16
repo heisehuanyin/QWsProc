@@ -1,21 +1,36 @@
 #include "def_configport.h"
 #include "def_logport.h"
 #include "def_window.h"
-#include "singalview.h"
+#include "def_channelpreface.h"
+#include "def_textmodel.h"
+#include "def_contentview.h"
+#include "def_menubar.h"
+
 #include "defaultlogport.h"
 #include "defaultconfigport.h"
-#include "def_channelpreface.h"
 #include "defaulttextmodel.h"
-#include "def_textmodel.h"
+#include "plaintextview.h"
+#include "singalview.h"
+#include "defaultmenubar.h"
+
+#include "customdialog.h"
+
+#include <QFileDialog>
+#include <QInputDialog>
 
 namespace Log = PlgDef::LogPort;
 namespace Cfg = PlgDef::ConfigPort;
 namespace Win = PlgDef::Window;
+namespace MBar = PlgDef::MenuBar;
+namespace CView = PlgDef::ContentView;
 
-Core::WsCore::WsCore():
+using namespace Core;
+
+WsCore::WsCore(QApplication* appi):
     DefaultLogpath("./log.wslog"),
     DefaultConfigpath("./cfg.wscfg"),
-    manager(new PluginManager(this))
+    manager(new PluginManager(this)),
+    app(appi)
 {
 
 }
@@ -25,12 +40,12 @@ Core::WsCore::~WsCore()
     delete this->manager;
 }
 
-Core::PluginManager* Core::WsCore::service_getManager()
+Core::PluginManager *Core::WsCore::service_getManager()
 {
     return manager;
 }
 
-void Core::WsCore::service_RegisterPlugin(PlgDef::I_PluginBase *p)
+void WsCore::service_RegisterPlugin(PlgDef::I_PluginBase *p)
 {
     this->connect(p, &PlgDef::I_PluginBase::signal_PushErrorReport,
                   this, &WsCore::slot_Recieve_ProcessError);
@@ -38,63 +53,439 @@ void Core::WsCore::service_RegisterPlugin(PlgDef::I_PluginBase *p)
     this->manager->factory_RegisterPlugin(p);
 }
 
-void Core::WsCore::service_RefreshComponents(PlgDef::Window::I_Window *win)
+
+
+
+void WsCore::service_RefreshComponents(PlgDef::Window::I_Window *win)
 {
-    //TODO
+    //TODO 刷新菜单栏，刷新工具栏，刷新状态栏
+
+    QString gid = win->getGroupID();
+    //auto vlist = win->getActivedView();
+    QList<QMenu*> external;
+
+    QMenu * m_File = new QMenu(tr("文件"));
+    QAction * _open = new QAction(tr("打开"), m_File);
+    this->connect(_open, &QAction::triggered, this, &WsCore::slot_OpenFileGloble);
+    m_File->addAction(_open);
+    QMenu * _new = new QMenu(tr("新建"), m_File);
+    this->connect(_new, &QMenu::triggered, this, &WsCore::slot_NewFileGloble);
+    m_File->addMenu(_new);
+    QMenu * _close = new QMenu(tr("关闭"), m_File);
+    this->connect(_close, &QMenu::triggered, this, &WsCore::slot_CloseFileGloble);
+    m_File->addMenu(_close);
+    m_File->addSeparator();
+    QAction * _save = new QAction(tr("保存全部"), m_File);
+    this->connect(_save, &QAction::triggered, this, &WsCore::slot_SaveOperation);
+    m_File->addAction(_save);
+    m_File->addSeparator();
+    QMenu * _print = new QMenu(tr("打印"), m_File);
+    this->connect(_print, &QMenu::triggered, this, &WsCore::slot_PrintGloble);
+    m_File->addMenu(_print);
+    m_File->addSeparator();
+    QAction * _exit = new QAction(tr("退出"), m_File);
+    this->connect(_exit, &QAction::triggered, this->app, &QApplication::closeAllWindows);
+    m_File->addAction(_exit);
+
+
+    QMenu * m_View = new QMenu(tr("视图"));
+    this->connect(m_View, &QMenu::triggered, this, &WsCore::slot_ViewChanges);
+
+
+    QMenu * m_Preference = new QMenu(tr("配置"));
+    QAction * _setting = new QAction(tr("全局配置"), m_Preference);
+    this->connect(_setting, &QAction::triggered, this, &WsCore::slot_MainConfigPanel);
+    m_Preference->addAction(_setting);
+    QMenu * _pcfg = new QMenu(tr("独立配置"), m_Preference);
+    this->connect(_pcfg, &QMenu::triggered, this, &WsCore::slot_ProjectConfig);
+    m_Preference->addMenu(_pcfg);
+    m_Preference->addSeparator();
+    QAction * _plgmgr = new QAction(tr("插件管理"), m_Preference);
+    this->connect(_plgmgr,&QAction::triggered, this, &WsCore::slot_PluginManager);
+    m_Preference->addAction(_plgmgr);
+
+
+    QMenu * m_Help = new QMenu(tr("帮助"));
+    QAction *_about = new QAction(tr("关于软件"),m_Help);
+    this->connect(_about, &QAction::triggered, this, &WsCore::slot_SoftwareAbout);
+    m_Help->addAction(_about);
+    QAction *_help = new QAction(tr("使用帮助"),m_Help);
+    this->connect(_help, &QAction::triggered, this, &WsCore::slot_HelpContent);
+    m_Help->addAction(_help);
+    QAction *_update = new QAction(tr("检查更新"), m_Help);
+    this->connect(_update, &QAction::triggered, this, &WsCore::slot_SoftwareUpdate);
+    m_Help->addAction(_update);
+    QAction *_report = new QAction(tr("报告bug"), m_Help);
+    this->connect(_report, &QAction::triggered, this, &WsCore::slot_ReportBugs);
+    m_Help->addAction(_report);
+
+    external.append(m_File);
+    external.append(m_View);
+    external.append(m_Preference);
+    external.append(m_Help);
+
+    //刷新Menubar
+    MBar::I_MenuBar* mbar = this->manager->instance_GetMenuBarInstance(gid);
+    auto bar = mbar->refreshMenuBarWidget(external);
+    win->service_ReplaceMenuBar(bar);
+
+    //刷新Toolsbar
+
+
+    //刷新StatusBar
+
 }
 
-void Core::WsCore::service_SaveOperation()
+void WsCore::slot_SaveOperation()
 {
     this->manager->operate_SaveOperation();
 }
 
-void Core::WsCore::service_OpenFile(const QString filePath, const QString pjtPath, PlgDef::I_PluginBase *win)
+void WsCore::operate_OpenFile(const QString filePath, Win::I_Window *win, QString pjtPath)
 {
-    //TODO
+    if(pjtPath == QString()){
+        auto cfg = this->instance_GetMainConfigPort();
+        pjtPath = cfg->getValue(Cfg::DefaultProjectFilePath_Key);
+    }
+
+    if(win == nullptr){
+        win = this->manager->instance_GetWindowInstance(Cfg::DefaultGraphicsGroupId);
+    }
+
+    QFileInfo info(filePath);
+    if(!info.exists()){
+        this->slot_Recieve_ProcessError(nullptr, "要打开的文件或者目录不存在：" + filePath, true);
+        return;
+    }
+
+
+    if(info.isFile()){
+        //以第一次打开的ProjectConfigPort为准
+        Cfg::I_ConfigPort *pjtCfg = this->getProjectConfigPort(filePath);
+        if(!pjtCfg){
+            QHash<QString, QString> xargs;
+            xargs.insert("Encoding", "UTF-8");
+            pjtCfg = this->manager->instance_GetConfigport(pjtPath, xargs);
+        }
+
+        PluginListNode *plglist = this->getAppointedPluginList(this->instance_GetMainConfigPort(),
+                                                               pjtCfg,
+                                                               filePath);
+
+        this->manager->operate_BuildChannel(filePath,
+                                            pjtPath,
+                                            plglist,
+                                            nullptr,
+                                            dynamic_cast<PlgDef::Window::I_Window*>(win));
+
+
+        delete plglist;
+        this->service_RefreshComponents(win);
+    }
+    if(info.isDir()){
+        this->slot_Recieve_ProcessError(nullptr, "待处理目录打开请求，暂时未处理", true);
+    }
 }
 
-PlgDef::LogPort::I_LogPort *Core::WsCore::instance_GetDefaultLogPort()
+void WsCore::operate_CloseContentView(PlgDef::ContentView::I_ContentView *comp, bool wetherSave)
+{
+    auto id = this->manager->channel_getChannelId(comp);
+    this->operate_CloseContentView(id, wetherSave);
+}
+
+void WsCore::operate_CloseContentView(QString channelid, bool wetherSave)
+{
+    if(wetherSave){
+        auto clist = this->manager->channel_GetExistsChannel(channelid);
+        this->manager->channel_SaveChannel(clist);
+    }
+    this->manager->channel_CloseChannelWithoutSave(channelid);
+}
+
+PlgDef::LogPort::I_LogPort * WsCore::instance_GetDefaultLogPort()
 {
     auto xargs = QHash<QString, QString>();
     xargs.insert("Encoding", "UTF-8");
-    auto rtn = this->service_getManager()->instance_GetLogport(this->DefaultLogpath, xargs);
+    auto rtn = this->manager->instance_GetLogport(this->DefaultLogpath, xargs);
     rtn->writeLog(nullptr, QDate::currentDate().toString("'This time:' yyyy.MM.dd.dddd")
                   + "("+ QTime::currentTime().toString("HH:mm:ss")  +")");
     return rtn;
 }
 
-PlgDef::ConfigPort::I_ConfigPort *Core::WsCore::instance_GetMainConfigPort()
+PlgDef::ConfigPort::I_ConfigPort * WsCore::instance_GetMainConfigPort()
 {
     QHash<QString, QString> xargs;
     xargs.insert("Encoding", "UTF-8");
 
-    return this->service_getManager()->instance_GetConfigport(this->DefaultConfigpath, xargs);
+    return this->manager->instance_GetConfigport(this->DefaultConfigpath, xargs);
 }
 
-void Core::WsCore::service_OpenSilentModel()
+void WsCore::service_OpenSilentModel()
+{
+    this->service_EnvironmentCheck();
+}
+
+void WsCore::service_OpenGraphicsModel(const QString groupId)
+{
+    this->service_OpenSilentModel();
+    QString gid = groupId;
+    if(groupId == QString())
+        gid = Cfg::DefaultGraphicsGroupId;
+    auto win = this->manager->instance_GetWindowInstance(gid);
+    this->instance_GetDefaultLogPort()->writeLog(nullptr, "打开窗口，Groupid=" + groupId);
+    this->service_RefreshComponents(win);
+}
+
+void WsCore::service_EnvironmentCheck()
 {
     this->operate_InitDefaultPlugins();
     this->operate_LoadAllPlugins();
+
+    // else ========================
+    auto cfg = this->instance_GetMainConfigPort();
+    auto defaultPjtPath = cfg->getValue(Cfg::DefaultProjectFilePath_Key);
+    if(defaultPjtPath == QString()){
+        QFileDialog::Option option = QFileDialog::ShowDirsOnly;
+        QString defaultPjtPath = QFileDialog::getExistingDirectory(nullptr, tr("选择默认项目保存路径"),"/home",option);
+
+        if(defaultPjtPath == QString()){
+            this->slot_Recieve_ProcessError(nullptr, "主目录输入问题");
+            exit(0);
+        }else{
+            defaultPjtPath.append("/project.pjtcfg");
+        }
+        cfg->setKeyValue(Cfg::DefaultProjectFilePath_Key, defaultPjtPath);
+        this->instance_GetDefaultLogPort()->writeLog(nullptr, "启动时DefaultProjectPath不存在，软件将Path重设为：" + defaultPjtPath);
+    }
 }
 
-void Core::WsCore::service_OpenGraphicsModel(const QString groupId)
+
+Core::PluginListNode* WsCore::buildPluginList(QString keyExport,
+                                              QString procdef,
+                                              Cfg::I_ConfigPort* pjtCfg){
+
+    PluginListNode * rtn = nullptr;
+    PluginListNode *parent = nullptr;
+
+    QStringList list = procdef.split("=>");
+    for(auto it = list.constBegin();
+        it != list.constEnd();
+        ++it){
+
+        PluginListNode *nnode = new PluginListNode(*it, parent);
+        if(it == list.constBegin()){
+            rtn = nnode;
+        }
+
+        if(parent){
+            parent->setNextNode(nnode);
+        }
+        parent = nnode;
+
+
+        auto args = pjtCfg->getConfigList(keyExport + "." + *it);
+        nnode->mergeArgsList(args);
+
+    }
+
+    return rtn;
+}
+
+void WsCore::slot_OpenFileGloble()
 {
-    this->service_OpenSilentModel();
-    this->service_getManager()->instance_GetWindowInstance(groupId);
+    std::cout<<"openfile"<<std::endl;
+}
+void WsCore::slot_NewFileGloble(QAction* act)
+{
+    std::cout<<"newfile"<<std::endl;
+}
+void WsCore::slot_PrintGloble(QAction* act)
+{
+    std::cout<<"print"<<std::endl;
+}
+void WsCore::slot_CloseFileGloble(QAction* act)
+{
+    std::cout<<"closefile"<<std::endl;
+}
+void WsCore::slot_ViewChanges(QAction *act)
+{
+    std::cout<<"ViewChange"<<std::endl;
+    QMessageBox::information(nullptr,"item",act->text());
+}
+void WsCore::slot_MainConfigPanel()
+{
+    this->customPane4ConfigPort(Cfg::DefaultGraphicsGroupId, nullptr);
+}
+void WsCore::slot_PluginManager()
+{
+
+}
+void WsCore::slot_ProjectConfig()
+{
+
+}
+void WsCore::slot_DocumentConfig()
+{
+
+}
+void WsCore::slot_SoftwareAbout()
+{
+
+}
+void WsCore::slot_HelpContent()
+{
+
+}
+void WsCore::slot_ReportBugs()
+{
+
+}
+void WsCore::slot_SoftwareUpdate()
+{
+
+}
+void WsCore::customPane4ConfigPort(QString groupId, PlgDef::ConfigPort::I_ConfigPort *customTarget)
+{
+    Win::I_Window *win = this->manager->instance_GetWindowInstance(groupId);
+
+    CustomDialog preference(this, this->instance_GetMainConfigPort(), win->getWidget());
+    if(customTarget){
+        QString path = this->manager->channel_getChannelId(customTarget);
+        preference.setFileParserCustomPane(customTarget, path);
+    }
+    preference.exec();
+}
+QString WsCore::service_Proc4Suffix(QString fullFilePath)
+{
+    QFileInfo info(fullFilePath);
+    QString suffix = info.fileName().replace(info.baseName() + ".", "");
+    suffix.replace('.', '_');
+    return suffix;
+}
+QString WsCore::service_ProcFilePath(QString fullFilePath, QString pjtfullFilePath)
+{
+    QFileInfo pjt(pjtfullFilePath);
+    QString pdir = pjt.canonicalPath();
+
+    QFileInfo file(fullFilePath);
+    fullFilePath = file.canonicalFilePath();
+
+    if(fullFilePath.indexOf(pdir) == -1){
+        fullFilePath.replace('.','_').replace(':',"___").replace('\\', "__").replace('/',"__");
+    }else{
+        fullFilePath.replace(pdir+"/", "").replace('.','_').replace('\\',"__").replace('/',"__");
+    }
+
+    return fullFilePath;
 }
 
-void Core::WsCore::test_InnerTest()
+QString WsCore::service_getPluginlistdefAtCfgport(QString keyStr, PlgDef::ConfigPort::I_ConfigPort *cfgPort, PluginListNode **nodelist)
+{
+    QString procdef = cfgPort->getValue(keyStr);
+    if(procdef == QString()){
+        return procdef;
+    }
+
+    //构建主链条
+    *nodelist = buildPluginList(keyStr,
+                                procdef,        //主链条定义
+                                cfgPort         //项目配置文件，用于搜索模块参数定义
+                                );
+
+    return procdef;
+}
+
+void WsCore::service_setPluginlistdefAtCfgport(PluginListNode *nodelist, QString keyStr, PlgDef::ConfigPort::I_ConfigPort *cfgPort)
+{
+    auto args = nodelist->getArgsList();
+    cfgPort->setConfigList(keyStr, *args);
+
+    QString temp = cfgPort->getValue(keyStr);
+    temp += nodelist->getPluginName();
+    if(nodelist->getNextNode() != nullptr){
+        temp += "=>";
+    }
+    cfgPort->setKeyValue(keyStr, temp);
+
+    if(nodelist->getNextNode() != nullptr)
+        this->service_setPluginlistdefAtCfgport(nodelist->getNextNode(), keyStr, cfgPort);
+}
+
+Core::PluginListNode *Core::WsCore::getAppointedPluginList(PlgDef::ConfigPort::I_ConfigPort *frameConfig,
+                                                           PlgDef::ConfigPort::I_ConfigPort *projectConfig,
+                                                           QString filePath)
+{
+    // Replace invalid string
+    QString suffix = this->service_Proc4Suffix(filePath);
+    QString prjPath = this->service_getManager()->channel_getChannelId(projectConfig);
+    filePath = this->service_ProcFilePath(filePath, prjPath);
+
+    // Encode the key string
+    QStringList list_key;
+    list_key << Cfg::EncodeFromMsg_4_KeyExport(filePath)
+             << Cfg::EncodeFromMsg_4_KeyExport(suffix)
+             << Cfg::EncodeFromMsg_4_KeyExport("____default")
+             << Cfg::EncodeFromMsg_4_KeyExport(suffix)
+             << Cfg::EncodeFromMsg_4_KeyExport("____default");
+
+    PluginListNode * nodelist;
+    for(int i=0; i<list_key.length(); ++i){
+        QString procdef;
+        auto key = list_key.at(i);
+        if(i < 3){
+            procdef = this->service_getPluginlistdefAtCfgport(key, projectConfig, &nodelist);
+        }else{
+            procdef = this->service_getPluginlistdefAtCfgport(key, frameConfig, &nodelist);
+            if(i == 4 && procdef == QString()){
+                nodelist = this->buildPluginList(key, Cfg::DefaultAnyFileParseList, frameConfig);
+                this->service_setPluginlistdefAtCfgport(nodelist, key, frameConfig);
+                procdef = Cfg::DefaultAnyFileParseList;
+            }
+            if(procdef != QString()){
+                this->service_setPluginlistdefAtCfgport(nodelist, key, projectConfig);
+            }
+        }
+
+        if(procdef != QString())
+            return nodelist;
+    }
+    return nullptr;
+}
+
+PlgDef::ConfigPort::I_ConfigPort *Core::WsCore::getProjectConfigPort(QString filePath)
+{
+    auto list = this->manager->channel_GetExistsChannel(filePath);
+    if(list != nullptr){
+        auto x = --list->constEnd();
+        auto p = *x;
+        if(p->pluginMark() != PlgDef::IO_ChannelPreface)
+            return nullptr;
+
+        QString pjtPath = dynamic_cast<PlgDef::ChannelPreface::I_ChannelPreface *>(p)->getProjectPath();
+        auto rtn = this->manager->instance_GetConfigport(pjtPath, QHash<QString, QString>());
+        return rtn;
+    }
+
+    return nullptr;
+}
+
+void WsCore::test_InnerTest()
 {
     QHash<QString, QString> p;
     p.insert("Encoding", "UTF-8");
-    auto a = this->service_getManager()->instance_GetChannelPreface(Cfg::DefaultChannelPreface_Value,"./log.wslog","pjtPath");
-    auto x = this->service_getManager()->instance_GetTextModel(Cfg::DefaultTextModel_Value, a, p);
+    auto a = this->manager->instance_GetChannelPreface(Cfg::DefaultChannelPreface_Value,"./log.wslog","pjtPath");
+    auto x = this->manager->instance_GetTextModel(Cfg::DefaultTextModel_Value, a, p);
     for(int i=0;i<x->getRowsCount();++i){
         std::cout<< x->getLineContent(i).toStdString() << std::endl;
     }
 }
 
-void Core::WsCore::slot_Recieve_ProcessError(PlgDef::I_PluginBase * const resp, QString msg)
+PlgDef::ConfigPort::I_ConfigPort *Core::WsCore::getProjectConfigPort(PlgDef::I_PluginBase *p){
+    QString cid = this->manager->channel_getChannelId(p);
+    return this->getProjectConfigPort(cid);
+}
+
+void WsCore::slot_Recieve_ProcessError(PlgDef::I_PluginBase * const resp, QString msg, bool ignoreAllows)
 {
     auto log = this->instance_GetDefaultLogPort();
     log->errorLog(resp,msg);
@@ -106,20 +497,25 @@ void Core::WsCore::slot_Recieve_ProcessError(PlgDef::I_PluginBase * const resp, 
         title += "MainFrame";
 
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::critical(nullptr, title, msg,QMessageBox::Ignore | QMessageBox::Abort);
+    if(ignoreAllows){
+        reply = QMessageBox::critical(nullptr, title, msg, QMessageBox::Ignore | QMessageBox::Abort, QMessageBox::Abort);
+    }else{
+        reply = QMessageBox::critical(nullptr, title, msg, QMessageBox::Abort);
+    }
 
-    if(reply == QMessageBox::Abort){
-        this->service_SaveOperation();
+
+    if(reply == QMessageBox::Abort || !ignoreAllows){
+        this->slot_SaveOperation();
         exit(0);
     }
 }
 
-void Core::WsCore::operate_LoadAllPlugins()
+void WsCore::operate_LoadAllPlugins()
 {
     //TODO
 }
 
-void Core::WsCore::operate_InitDefaultPlugins()
+void WsCore::operate_InitDefaultPlugins()
 {
     this->service_RegisterPlugin(new Log::DefaultLogPort);
     this->service_RegisterPlugin(new Cfg::DefaultConfigPort);
@@ -127,7 +523,9 @@ void Core::WsCore::operate_InitDefaultPlugins()
     this->service_RegisterPlugin(new PlgDef::ChannelPreface::I_ChannelPreface);
     this->service_RegisterPlugin(new PlgDef::TextModel::DefaultTextModel);
 
+    this->service_RegisterPlugin(new CView::PlainTextView);
     this->service_RegisterPlugin(new Win::DefaultSingalView);
+    this->service_RegisterPlugin(new MBar::DefaultMenuBar);
 }
 
 
@@ -150,12 +548,17 @@ Core::PluginManager::~PluginManager()
     delete this->instances;
 }
 
-void Core::PluginManager::factory_RegisterPlugin(PlgDef::I_PluginBase *p)
+void PluginManager::factory_RegisterPlugin(PlgDef::I_PluginBase *p)
 {
     auto repeat = this->factories->find(p->registName());
     if(repeat != this->factories->constEnd()){
         QString error = "重复注册插件：";
         error += p->registName();
+        error += " {Type:";
+        error += QString("%1, ").arg(p->pluginMark());
+        error += "UpStream Type:";
+        error += QString("%1}").arg(p->upStreamMark());
+
         emit p->signal_PushErrorReport(p, error);
 
         return;
@@ -172,7 +575,7 @@ void Core::PluginManager::factory_RegisterPlugin(PlgDef::I_PluginBase *p)
     this->factories->insert(p->registName(), p);
 }
 
-void Core::PluginManager::operate_SaveOperation()
+void PluginManager::operate_SaveOperation()
 {
     for(auto channelPair = this->instances->constBegin();
         channelPair != this->instances->constEnd();
@@ -183,8 +586,37 @@ void Core::PluginManager::operate_SaveOperation()
     this->channel_SaveChannel(this->configunits);
 }
 
+void PluginManager::operate_BuildChannel(const QString filepath,
+                                         const QString projectpath,
+                                         PluginListNode * plglist,
+                                         PlgDef::I_PluginBase* upStream,
+                                         PlgDef::Window::I_Window* win)
+{
+    auto plgname = plglist->getPluginName();
+    auto factory = this->factory_GetExistsFactory(plgname);
+    PlgDef::I_PluginBase* thisInstance = nullptr;
 
-void Core::PluginManager::channel_SaveChannel(QList<PlgDef::I_PluginBase *> * channel)
+
+    switch (factory->pluginMark()) {
+    case PlgDef::IO_ChannelPreface:{
+            thisInstance = this->instance_GetChannelPreface(plgname, filepath, projectpath);
+        };break;
+    case PlgDef::IO_TextModel:{
+            thisInstance = this->instance_GetTextModel(plgname, upStream, *plglist->getArgsList());
+        };break;
+    case PlgDef::UI_ContentView:{
+            thisInstance = this->instance_GetContentView(win, plgname, upStream, *plglist->getArgsList());
+        };break;
+    }
+
+
+    if(plglist->getNextNode() != nullptr){
+        this->operate_BuildChannel(filepath, projectpath,plglist->getNextNode(), thisInstance, win);
+    }
+}
+
+
+void PluginManager::channel_SaveChannel(QList<PlgDef::I_PluginBase *> * channel)
 {
     for(auto plugin = channel->constBegin();
         plugin != channel->constEnd();
@@ -193,7 +625,7 @@ void Core::PluginManager::channel_SaveChannel(QList<PlgDef::I_PluginBase *> * ch
     }
 }
 
-void Core::PluginManager::channel_CloseChannelWithoutSave(const QString key)
+void PluginManager::channel_CloseChannelWithoutSave(const QString key)
 {
     if(this->instances->contains(key)){
         auto channel = this->instances->take(key);
@@ -205,7 +637,7 @@ void Core::PluginManager::channel_CloseChannelWithoutSave(const QString key)
     }
 }
 
-const QString Core::PluginManager::channel_getChannelId(PlgDef::I_PluginBase *pExample)
+const QString PluginManager::channel_getChannelId(PlgDef::I_PluginBase *pExample)
 {
     for(auto i=this->instances->constBegin();
         i != this->instances->constEnd();
@@ -308,11 +740,50 @@ PlgDef::TextModel::I_TextModel *Core::PluginManager::instance_GetTextModel(const
     return textm;
 }
 
-PlgDef::I_PluginBase *Core::PluginManager::instance_GetWindowInstance(const QString gId)
+PlgDef::ContentView::I_ContentView *Core::PluginManager::instance_GetContentView(Win::I_Window * win, const QString factory_id,
+                                                                                 PlgDef::I_PluginBase *upStream, QHash<QString, QString> xargs)
+{
+    auto cflag = this->channel_getChannelId(upStream);
+    auto cList = this->channel_GetExistsChannel(cflag);
+    if(cList != nullptr){
+        for(auto i=cList->constBegin();
+            i != cList->constEnd();
+            ++i){
+            if((*i)->registName() == factory_id){
+                return dynamic_cast<PlgDef::ContentView::I_ContentView *>(*cList->constBegin());
+            }
+        }
+    }
+
+    auto factory = this->factory_GetExistsFactory(factory_id);
+    if(factory == nullptr){
+        this->core->slot_Recieve_ProcessError(nullptr, "参数错误，索求插件未注册。id:" + factory_id);
+        exit(0);
+    }
+
+    auto view = dynamic_cast<PlgDef::ContentView::I_ContentView*>(factory)->createNewContentView(this->core,
+                                                                                                 upStream, xargs, win->getGroupID());
+    this->instance_RegisterPluginInstance(cflag,view);
+
+    if(cflag.length() > 20){
+        cflag = cflag.replace(3,cflag.length()-17, "...");
+    }
+
+    win->placeView(cflag, view);
+
+    return view;
+}
+
+Win::I_Window *Core::PluginManager::instance_GetWindowInstance(const QString gId)
 {
     auto cList = this->channel_GetExistsChannel(gId);
     if(cList != nullptr)
-        return dynamic_cast<Win::I_Window *>(*cList->constBegin());
+        for(auto i=cList->constBegin();
+            i != cList->constEnd();
+            ++i){
+            if((*i)->pluginMark() == PlgDef::UI_Window)
+                return dynamic_cast<Win::I_Window*>(*i);
+        }
 
     auto factory = this->factory_GetExistsFactoryWithCfg(Cfg::DefaultWindowType_Key, Cfg::DefaultWindowType_Value);
 
@@ -329,7 +800,26 @@ PlgDef::I_PluginBase *Core::PluginManager::instance_GetWindowInstance(const QStr
     return win;
 }
 
-QHash<PlgDef::PluginType, QList<QPair<QString, PlgDef::PluginType>>> Core::PluginManager::service_QueryFactoryList()
+PlgDef::MenuBar::I_MenuBar *PluginManager::instance_GetMenuBarInstance(const QString gId)
+{
+    auto cList = this->channel_GetExistsChannel(gId);
+    if(cList != nullptr)
+        for(auto i=cList->constBegin();
+            i != cList->constEnd();
+            ++i){
+            if((*i)->pluginMark() == PlgDef::UI_MenuBar)
+                return dynamic_cast<MBar::I_MenuBar*>(*i);
+        }
+
+    auto factory = this->factory_GetExistsFactoryWithCfg(Cfg::DefaultMenuBarType_Key, Cfg::DefaultMenuBarType_Value);
+
+    auto mbar = dynamic_cast<MBar::I_MenuBar*>(factory)->createNewMenubar(this->core, gId);
+    this->instance_RegisterPluginInstance(gId, mbar);
+
+    return mbar;
+}
+
+QHash<PlgDef::PluginType, QList<QPair<QString, PlgDef::PluginType>>> PluginManager::service_QueryFactoryList()
 {
     auto rtn = QHash<PlgDef::PluginType, QList<QPair<QString, PlgDef::PluginType>>>();
     for(auto itor = this->factories->constBegin();
@@ -351,7 +841,7 @@ QHash<PlgDef::PluginType, QList<QPair<QString, PlgDef::PluginType>>> Core::Plugi
     return rtn;
 }
 
-QList<QPair<QString, PlgDef::PluginType> > Core::PluginManager::service_QueryFactoryList(PlgDef::PluginType typeMark)
+QList<QPair<QString, PlgDef::PluginType> > PluginManager::service_QueryFactoryList(PlgDef::PluginType typeMark)
 {
     auto hash = this->service_QueryFactoryList();
     auto itor = hash.find(typeMark);
@@ -360,7 +850,7 @@ QList<QPair<QString, PlgDef::PluginType> > Core::PluginManager::service_QueryFac
     return QList<QPair<QString, PlgDef::PluginType>>();
 }
 
-QList<QPair<QString, PlgDef::PluginType> > Core::PluginManager::service_QueryFactoryList(const QString pRegistName)
+QList<QPair<QString, PlgDef::PluginType> > PluginManager::service_QueryFactoryList(const QString pRegistName)
 {
     auto typeMark = this->factory_GetExistsFactory(pRegistName)->pluginMark();
     return this->service_QueryFactoryList(typeMark);
@@ -376,7 +866,7 @@ PlgDef::I_PluginBase *Core::PluginManager::factory_GetExistsFactory(const QStrin
 }
 
 PlgDef::I_PluginBase *Core::PluginManager::factory_GetExistsFactoryWithCfg
-            (const QString key, const QString defaultVal)
+(const QString key, const QString defaultVal)
 {
     const QString fId = this->core->instance_GetMainConfigPort()
             ->getValue(key, defaultVal);
@@ -393,7 +883,7 @@ PlgDef::I_PluginBase *Core::PluginManager::factory_GetExistsFactoryWithCfg
     return factory;
 }
 
-void Core::PluginManager::instance_RegisterPluginInstance(const QString key, PlgDef::I_PluginBase * const p)
+void PluginManager::instance_RegisterPluginInstance(const QString key, PlgDef::I_PluginBase * const p)
 {
     QObject::connect(p, &PlgDef::I_PluginBase::signal_PushErrorReport,
                      this->core, &WsCore::slot_Recieve_ProcessError);
@@ -407,7 +897,7 @@ void Core::PluginManager::instance_RegisterPluginInstance(const QString key, Plg
     cList.value()->insert(0, p);
 }
 
-void Core::PluginManager::slot_saveWindowSize(const QString groupID, int width, int height)
+void PluginManager::slot_saveWindowSize(const QString groupID, int width, int height)
 {
     auto cfg = this->core->instance_GetMainConfigPort();
     QString wStr = QString("%1").arg(width, 5, 10, QChar('0'));

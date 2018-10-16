@@ -34,13 +34,17 @@ namespace PlgDef {
             virtual QString getLineContent(int row) override;
             virtual void updateLineContent(int row, const QString content) override;
             virtual void insertLineAt(int row, const QString content) override;
-            virtual void removeLines(int begin, int offset) override;
+            virtual void removeLines(int begin, int offset = -1) override;
 
         private:
             QList<QString> contents;
             Core::WsCore * core;
             QTextCodec *codec;
             QFile *file;
+
+            // I_TextModel interface
+        public:
+            virtual void reLoadAllText(QString text) override;
         };
     }
 }

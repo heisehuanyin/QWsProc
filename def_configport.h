@@ -8,33 +8,38 @@
 namespace PlgDef {
     namespace ConfigPort {
         namespace  {
+            QString DefaultGraphicsGroupId = "MainWindow";
             QString DefaultWindowWidth_Value = "800";
             QString DefaultWindowHeight_Value = "600";
             QString DefaultWindowType_Key = "UI.DefaultWinType";
             QString DefaultWindowType_Value = "DefaultSingalView";
+            QString DefaultMenuBarType_Key = "UI.DefaultMenubarType";
+            QString DefaultMenuBarType_Value = "DefaultMenuBar";
+
 
             QString DefaultChannelPreface_Key = "IO.DefaultChannelPreface";
             QString DefaultChannelPreface_Value = "ChannelPreface";
             QString DefaultTextModel_Key = "IO.DefaultTextModelType";
             QString DefaultTextModel_Value = "DefaultTextModel";
 
-            QString DefaultWindowWidth_Key(QString groupID){
-                QString key = "default.window." + groupID + ".width";
-                return key;
-            }
-            QString DefaultWindowHeight_Key(QString groupID){
-                QString key = "default.window." + groupID + ".height";
-                return key;
-            }
+
+            QString DefaultProjectFilePath_Key = "Env.default_project_path";
+
+            QString DefaultAnyFileParseList = "ChannelPreface=>DefaultTextModel=>PlainTextView";
+
         }
+
+        QString DefaultWindowWidth_Key(QString groupID);
+        QString DefaultWindowHeight_Key(QString groupID);
+        QString EncodeFromMsg_4_KeyExport(QString msg);
 
         class I_ConfigPort : public I_PluginBase
         {
             Q_OBJECT
 
         public:
-            I_ConfigPort(){}
-            virtual ~I_ConfigPort() override {}
+            I_ConfigPort();
+            virtual ~I_ConfigPort() override;
 
             /**
              * @brief 创建一个新的配置文件访问接口
@@ -81,9 +86,7 @@ namespace PlgDef {
 
             // I_PluginBase interface
         public:
-            virtual PluginType pluginMark() override final{
-                return PlgDef::Service_ConfigPort;
-            }
+            virtual PluginType pluginMark() override final;
         };
     }
 }
