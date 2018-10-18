@@ -24,7 +24,7 @@ namespace PlgDef {
                                                               const QString filePath,
                                                               const QString pjtPath);
 
-            virtual QString getProjectPath();
+            virtual QString getProjectCfgfilePath();
 
             virtual QString getFilePath();
 

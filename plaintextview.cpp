@@ -25,11 +25,11 @@ void PlainTextView::saveOperation()
 }
 
 I_ContentView *PlainTextView::createNewContentView(Core::WsCore *core, PlgDef::I_PluginBase *upStream,
-                                                   QHash<QString, QString> xargs, const QString groupID)
+                                                   QHash<QString, QString> xargs, PlgDef::Window::I_Window* win)
 {
     auto rtn = new PlainTextView;
 
-    rtn->groupId = groupID;
+    rtn->owner = win;
     rtn->core = core;
     rtn->textmodel = dynamic_cast<PlgDef::TextModel::I_TextModel*>(upStream);
 
@@ -46,6 +46,7 @@ QWidget *PlainTextView::getWidget()
     return this->editArea;
 }
 
-QString PlainTextView::getGroupId() {
-    return this->groupId;
+PlgDef::Window::I_Window *PlainTextView::getOwner()
+{
+    return this->owner;
 }

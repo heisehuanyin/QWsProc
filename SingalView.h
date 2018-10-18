@@ -5,6 +5,7 @@
 
 #include <QMainWindow>
 #include <QResizeEvent>
+#include <QStackedLayout>
 
 
 namespace PlgDef {
@@ -25,34 +26,33 @@ namespace PlgDef {
 
             // I_Window interface
         public:
-            PlgDef::Window::I_Window *openNewWindow(Core::WsCore *core, const QString gid, int width, int height) override;
-            const QString getGroupID() override;
-            void setTitle(const QString title) override;
-            void placeView(const QString viewTitle, PlgDef::ContentView::I_ContentView *comp) override;
-            void service_ReplaceMenuBar(QMenuBar *bar) override;
-            QList<PlgDef::ContentView::I_ContentView *> * getActivedView() override;
+            virtual PlgDef::Window::I_Window *openNewWindow(Core::WsCore *core, const QString gid, int width, int height) override;
+            virtual const QString getGroupID() override;
+            virtual void service_ReplaceMenuBar(QMenuBar *bar) override;
+            virtual void setTitle(const QString title) override;
+            virtual void placeView(const QString viewTitle, PlgDef::ContentView::I_ContentView *comp) override;
+            virtual void removeView(ContentView::I_ContentView *cmop) override;
+            virtual void bringViewToFront(ContentView::I_ContentView *comp) override;
+            virtual QList<PlgDef::ContentView::I_ContentView *> getActivedView() override;
+            virtual QList<ContentView::I_ContentView *> getAllView() override;
             virtual void setSize(int width, int height) override;
+            virtual QWidget *getWidget() override;
 
         private:
             QString gid;
             Core::WsCore * core;
-            PlgDef::ContentView::I_ContentView * centralView;
             const QString plgName;
             _CustomWindow *const window;
-            QList<PlgDef::ContentView::I_ContentView *> *const list;
+            QHash<PlgDef::ContentView::I_ContentView *, QString> *const list;
+            QStackedLayout *const stack;
+            QWidget*const basePanel;
 
         private slots:
             void receiveWindowResize(int width, int height){
                 emit this->signal_resizeWindow(this->gid, width, height);
             }
 
-            // I_Window interface
-        public:
-            virtual QWidget *getWidget() override;
 
-            // I_Window interface
-        public:
-            virtual QList<ContentView::I_ContentView *> *getAllView() override;
         };
 
     }

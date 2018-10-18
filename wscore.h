@@ -53,11 +53,35 @@ namespace Core {
          * @brief 全局保存操作
          */
         void operate_SaveOperation();
-        void operate_BuildChannel(const QString filepath,
-                                  const QString projectpath,
-                                  PluginListNode * plglist,
+
+        /**
+         * @brief 构建一个打开的文件编辑通道
+         * @param filepath 文件路径
+         * @param pjtcfgpath 项目配置文件路径
+         * @param plglist 插件定义链
+         * @param upStream 上游插件实例
+         * @param win 刷新窗口
+         * @return 插件链条最后一个插件实例
+         */
+        PlgDef::I_PluginBase* operate_BuildChannel(const QString filepath,
+                                  const QString pjtcfgpath,
+                                  CoreBase::PluginListNode * plglist,
                                   PlgDef::I_PluginBase* upStream,
                                   PlgDef::Window::I_Window* win);
+
+        /**
+         * @brief 校对本文件后缀名是否用于定义项目
+         * @param suffix 后缀
+         * @return 结果
+         */
+        bool service_isProjectDefine(QString suffix);
+
+        /**
+         * @brief 核查，确认与提供widget相同的Window实例
+         * @param widget 关键widget
+         * @return window实例
+         */
+        PlgDef::Window::I_Window* service_CheckWindow(QWidget* widget);
 
         /**
          * @brief 保存特定通道所有插件内容
@@ -137,7 +161,11 @@ namespace Core {
          */
         PlgDef::Window::I_Window * instance_GetWindowInstance(const QString gId);
 
-
+        /**
+         * @brief 获取配置项设定的菜单栏实例一个
+         * @param gId GroupId
+         * @return 实例
+         */
         PlgDef::MenuBar::I_MenuBar * instance_GetMenuBarInstance(const QString gId);
 
         //Query Methods
@@ -161,13 +189,17 @@ namespace Core {
          */
         QList<QPair<QString, PlgDef::PluginType>> service_QueryFactoryList(const QString pRegistName);
 
+        QList<QString> service_QueryChannelList();
+
     private:
         QHash<QString, PlgDef::I_PluginBase *> *const factories;
-        QList<PlgDef::I_PluginBase *> *const configunits;
+        QList<PlgDef::I_PluginBase *> *const key_ins;
         QHash<QString, QList<PlgDef::I_PluginBase *> *> *const instances;
         WsCore *const core;
         QString logportName;
         QString configportName;
+        QList<QString> pjtformats;
+        QList<PlgDef::Window::I_Window*> winlist;
 
         /**
          * @brief 获取已经存在的插件工厂
@@ -222,13 +254,14 @@ namespace Core {
 
 
         /**
-         * @brief 打开特定文件，如果通道中插件有ContentView类型，会自动加载到本窗口上
+         * @brief 打开指定文件，如果通道中插件有ContentView类型且win!=nullptr，ContentView会自动加载到本窗口上
+         * 1.如果指定文件是项目定义文件，其默认项目配置文件处于同路径，同文件名，解析过程中先加载配置文件，然后应用于项目文件解析
+         * 2.如果指定文件不是项目定义文件，其打开过程需要提供项目配置文件，以便于提取解析参数，若不指定项目配置文件，则采用默认项目配置文件
          * @param filePath 目标文件所在路径
          * @param prjPath 项目配置文件所在路径
          * @param win 发出请求的窗口
          */
-        void operate_OpenFile(const QString filePath, PlgDef::Window::I_Window *win = nullptr, const QString prjPath = QString());
-
+        void operate_OpenFile(const QString filePath, PlgDef::ConfigPort::I_ConfigPort* prjcfg = nullptr, PlgDef::Window::I_Window *win = nullptr);
 
         /**
          * @brief 关闭指定ContentView
@@ -236,12 +269,6 @@ namespace Core {
          * @param wetherSave 是否保持选项
          */
         void operate_CloseContentView(PlgDef::ContentView::I_ContentView *comp, bool wetherSave=true);
-        /**
-         * @brief 关闭指定ContentView
-         * @param channelid 通道id
-         * @param wetherSave 是否保存插件内容
-         */
-        void operate_CloseContentView(QString channelid, bool wetherSave = true);
 
         /**
          * @brief 获取默认的LogPort插件实例
@@ -281,7 +308,7 @@ namespace Core {
          * @param groupId 窗口的groupid码
          * @param customTarget 目标配置端口
          */
-        void customPane4ConfigPort(QString groupId, PlgDef::ConfigPort::I_ConfigPort * customTarget = nullptr);
+        void customPane4ConfigPort(PlgDef::Window::I_Window* parent, PlgDef::ConfigPort::I_ConfigPort * customTarget = nullptr);
 
         QString service_Proc4Suffix(QString fullFilePath);
         QString service_ProcFilePath(QString fullFilePath, QString pjtFullFilePath);
@@ -293,7 +320,7 @@ namespace Core {
          * @param nodelist 返回的插件定义链
          * @return 插件定义字符串----主编辑插件链
          */
-        QString service_getPluginlistdefAtCfgport(QString keyStr, PlgDef::ConfigPort::I_ConfigPort* cfgPort, PluginListNode **nodelist);
+        QString service_getPluginlistdefAtCfgport(QString keyStr, PlgDef::ConfigPort::I_ConfigPort* cfgPort, CoreBase::PluginListNode **nodelist);
 
         /**
          * @brief 向指定配置端口写入插件定义链条
@@ -301,7 +328,7 @@ namespace Core {
          * @param keyStr 索引关键键名
          * @param cfgPort 指定配置端口
          */
-        void service_setPluginlistdefAtCfgport(PluginListNode *nodelist, QString keyStr, PlgDef::ConfigPort::I_ConfigPort* cfgPort);
+        void service_setPluginlistdefAtCfgport(CoreBase::PluginListNode *nodelist, QString keyStr, PlgDef::ConfigPort::I_ConfigPort* cfgPort);
 
     public slots:
         /**
@@ -338,12 +365,12 @@ namespace Core {
          * @brief 核查环境信息
          */
         void service_EnvironmentCheck();
+
         /**
-         * @brief 根据打开文档路径获取关联项目配置端口
-         * @param filePath 打开的文档路径
-         * @return 配置端口实例
+         * @brief 获取当前激活的窗口，屏幕最上方的那个
+         * @return 窗口插件实例
          */
-        PlgDef::ConfigPort::I_ConfigPort* getProjectConfigPort(QString filePath);
+        PlgDef::Window::I_Window* getActivedWindow();
 
         enum ProcLocation{
             fileName,
@@ -359,11 +386,11 @@ namespace Core {
          * @param filePath 指定文件
          * @return 插件定义列表示例，记得删除该实例
          */
-        PluginListNode* getAppointedPluginList(PlgDef::ConfigPort::I_ConfigPort *frameConfig,
+        CoreBase::PluginListNode* getAppointedPluginList(PlgDef::ConfigPort::I_ConfigPort *frameConfig,
                                                PlgDef::ConfigPort::I_ConfigPort *projectConfig,
                                                QString filePath);
 
-        Core::PluginListNode* buildPluginList(QString keyExport,
+        Core::CoreBase::PluginListNode* buildPluginList(QString keyExport,
                                               QString procdef,
                                               PlgDef::ConfigPort::I_ConfigPort* pjtCfg);
     private slots:

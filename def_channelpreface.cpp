@@ -19,7 +19,7 @@ PlgDef::ChannelPreface::I_ChannelPreface *PlgDef::ChannelPreface::I_ChannelPrefa
     return rtn;
 }
 
-QString PlgDef::ChannelPreface::I_ChannelPreface::getProjectPath(){
+QString PlgDef::ChannelPreface::I_ChannelPreface::getProjectCfgfilePath(){
     return this->pjtPath;
 }
 

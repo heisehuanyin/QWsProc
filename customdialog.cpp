@@ -8,7 +8,7 @@
 #include <QTableWidget>
 
 using namespace Core;
-using namespace Core::CustomBase;
+using namespace Core::CoreBase;
 
 namespace Cfg = PlgDef::ConfigPort;
 

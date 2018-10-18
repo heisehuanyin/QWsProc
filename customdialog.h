@@ -13,7 +13,7 @@
 #include <QTableView>
 
 namespace Core {
-    namespace CustomBase {
+    namespace CoreBase {
         class FileParsePanel : public QVBoxLayout{
             Q_OBJECT
         public:
@@ -97,7 +97,7 @@ namespace Core {
         void defaultStatusBarType(const QString type);
         void defaultFloatPanelType(const QString type);
 
-        CustomBase::FileParsePanel * getFileParsePanel(PlgDef::ConfigPort::I_ConfigPort *cfg_port);
+        CoreBase::FileParsePanel * getFileParsePanel(PlgDef::ConfigPort::I_ConfigPort *cfg_port);
     };
 
 }

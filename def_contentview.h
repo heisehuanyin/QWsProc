@@ -7,6 +7,9 @@
 
 
 namespace PlgDef {
+    namespace Window {
+        class I_Window;
+    }
 
     /**
     @brief 内容面板命名空间*/
@@ -28,10 +31,10 @@ namespace PlgDef {
              * @return 新实例
              */
             virtual I_ContentView* createNewContentView(Core::WsCore *core, PlgDef::I_PluginBase *upStream,
-                                                        QHash<QString,QString> xargs, const QString groupID)=0;
+                                                        QHash<QString,QString> xargs, Window::I_Window* win)=0;
 
             virtual QWidget* getWidget() = 0;
-            virtual QString getGroupId()=0;
+            virtual Window::I_Window* getOwner()=0;
 
 
 

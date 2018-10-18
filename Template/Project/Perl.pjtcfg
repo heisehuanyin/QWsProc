@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+<recordList>
+    <file_parse>
+        <NewOne_txt>
+            <proclist/>
+        </NewOne_txt>
+        <txt>
+            <proclist/>
+        </txt>
+        <____default>
+            <proclist specify="ChannelPreface=>DefaultTextModel=>PlainTextView">
+                <ChannelPreface/>
+                <DefaultTextModel/>
+                <PlainTextView/>
+            </proclist>
+        </____default>
+    </file_parse>
+</recordList>

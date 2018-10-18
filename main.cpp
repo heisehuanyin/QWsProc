@@ -34,10 +34,11 @@ int main(int argc, char *argv[])
     }
 
 
-    app->service_OpenGraphicsModel();
+    app->service_OpenGraphicsModel("Default");
 
     if(argc > 2 && QString(argv[1]).indexOf('s') != -1){
-        app->operate_OpenFile(argv[2]);
+        app->operate_OpenFile(argv[2], nullptr,
+                app->service_getManager()->instance_GetWindowInstance("Default"));
     }
 
     int rtnum = a.exec();

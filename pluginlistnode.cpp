@@ -1,44 +1,46 @@
 #include "pluginlistnode.h"
 
-Core::PluginListNode::PluginListNode(const QString plgRName, Core::PluginListNode *previous):
+using namespace Core::CoreBase;
+
+PluginListNode::PluginListNode(const QString plgRName, PluginListNode *previous):
     plugName(plgRName),
     previous(previous),
     nextnode(nullptr),
     xargs(new QHash<QString, QString>())
 {}
 
-Core::PluginListNode::~PluginListNode(){
+PluginListNode::~PluginListNode(){
     delete this->nextnode;
     delete xargs;
 }
 
-Core::PluginListNode *Core::PluginListNode::getPreviousNode(){
+PluginListNode *PluginListNode::getPreviousNode(){
     return this->previous;
 }
 
-QString Core::PluginListNode::getPluginName(){
+QString PluginListNode::getPluginName(){
     return this->plugName;
 }
 
-void Core::PluginListNode::setNextNode(Core::PluginListNode *node){
+void PluginListNode::setNextNode(PluginListNode *node){
     this->nextnode = node;
 }
 
-Core::PluginListNode *Core::PluginListNode::getNextNode()
+PluginListNode *PluginListNode::getNextNode()
 {
     return this->nextnode;
 }
 
 
-QHash<QString, QString> *Core::PluginListNode::getArgsList(){
+QHash<QString, QString> *PluginListNode::getArgsList(){
     return this->xargs;
 }
 
-void Core::PluginListNode::insertArgs(QString key, QString value){
+void PluginListNode::insertArgs(QString key, QString value){
     this->xargs->insert(key, value);
 }
 
-void Core::PluginListNode::mergeArgsList(QHash<QString, QString> args){
+void PluginListNode::mergeArgsList(QHash<QString, QString> args){
     for(auto xargsi = args.constBegin();
         xargsi != args.constEnd();
         ++xargsi){

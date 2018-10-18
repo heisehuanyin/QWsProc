@@ -56,7 +56,16 @@ namespace PlgDef {
              */
             virtual const QString getGroupID() = 0;
 
+            /**
+             * @brief 获取显示元素
+             * @return 显示元素
+             */
             virtual QWidget* getWidget()=0;
+            /**
+             * @brief 利用传入的MenuBar刷新本窗口的菜单栏及其组件
+             * @param bar 菜单栏组件
+             */
+            virtual void service_ReplaceMenuBar(QMenuBar *bar) = 0;
 
             /**
              * @brief 将ContentView放置在本窗体上
@@ -66,22 +75,29 @@ namespace PlgDef {
             virtual void placeView(const QString viewTitle, ContentView::I_ContentView *comp) = 0;
 
             /**
-             * @brief 利用传入的MenuBar刷新本窗口的菜单栏及其组件
-             * @param bar 菜单栏组件
+             * @brief 移除本窗体上的ContentView
+             * @param cmop 视图
              */
-            virtual void service_ReplaceMenuBar(QMenuBar *bar) = 0;
+            virtual void removeView(ContentView::I_ContentView* cmop) = 0;
+
+            /**
+             * @brief 设置指定窗体视图成员为封面视图，若制定项目非窗体视图成员，无响应
+             * @param comp 指定视图成员
+             */
+            virtual void bringViewToFront(ContentView::I_ContentView* comp)=0;
 
             /**
              * @brief 获取本窗口中的活动视图，也就是活动视图，当存在多个分隔区域的时候，返回每个区域的活动视图,基本被用作刷新菜单栏
              * @param views 存取视图容器
              */
-            virtual QList<ContentView::I_ContentView *> * getActivedView() = 0;
+            virtual QList<ContentView::I_ContentView *> getActivedView() = 0;
 
             /**
              * @brief 获取布局在本窗口上的所有视图清单，基本被用作刷新视图菜单，打印菜单
              * @return 清单
              */
-            virtual QList<ContentView::I_ContentView *> * getAllView() = 0;
+            virtual QList<ContentView::I_ContentView *> getAllView() = 0;
+
         signals:
             /**
              * @brief 当窗口尺寸发生变化，发送该信号
@@ -109,8 +125,6 @@ namespace PlgDef {
         public:
             virtual PluginType pluginMark() override final;
 
-            // I_PluginBase interface
-        public:
             virtual PluginType upStreamMark() override final;
         };
 

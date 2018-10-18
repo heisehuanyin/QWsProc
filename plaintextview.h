@@ -30,15 +30,16 @@ namespace PlgDef {
             // I_ContentView interface
         public:
             virtual I_ContentView *createNewContentView(Core::WsCore *core, I_PluginBase *upStream,
-                                                        QHash<QString, QString> xargs, const QString groupID) override;
+                                                        QHash<QString, QString> xargs, PlgDef::Window::I_Window* win) override;
             virtual QWidget *getWidget() override;
-            virtual QString getGroupId() override;
+            virtual Window::I_Window *getOwner() override;
 
         private:
-            QString groupId;
+            Window::I_Window* owner;
             Core::WsCore *core;
             PlgDef::TextModel::I_TextModel *textmodel;
             QTextEdit *const editArea;
+
         };
     }
 }

@@ -20,7 +20,8 @@ namespace PlgDef{
         IO_StyleModel,
 
         Service_ConfigPort,
-        Service_LogPort
+        Service_LogPort,
+        Service_ProjectManager,
     };
 
     /**

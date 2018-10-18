@@ -23,7 +23,7 @@ namespace PlgDef {
             QString DefaultTextModel_Value = "DefaultTextModel";
 
 
-            QString DefaultProjectFilePath_Key = "Env.default_project_path";
+            QString DefaultProjectCfgFilePath_Key = "Env.default_project_path";
 
             QString DefaultAnyFileParseList = "ChannelPreface=>DefaultTextModel=>PlainTextView";
 
@@ -32,6 +32,7 @@ namespace PlgDef {
         QString DefaultWindowWidth_Key(QString groupID);
         QString DefaultWindowHeight_Key(QString groupID);
         QString EncodeFromMsg_4_KeyExport(QString msg);
+        QString WhetherSuffixIsProjectFile_Key(QString suffix);
 
         class I_ConfigPort : public I_PluginBase
         {
@@ -42,7 +43,7 @@ namespace PlgDef {
             virtual ~I_ConfigPort() override;
 
             /**
-             * @brief 创建一个新的配置文件访问接口
+             * @brief 创建一个新的配置文件访问接口,文件存在则打开，不存在则新建一个在打开
              * @param core 核心调度模块
              * @param fPath 配置文件路径
              * @param argslist 参数列表
