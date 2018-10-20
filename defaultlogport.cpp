@@ -30,11 +30,6 @@ const QString DefaultLogPort::registName()
 }
 
 
-PlgDef::PluginType PlgDef::LogPort::DefaultLogPort::upStreamMark()
-{
-    return PlgDef::IO_NoUpStream;
-}
-
 QMenu *PlgDef::LogPort::DefaultLogPort::getCustomMenu()
 {
     return nullptr;

@@ -1,23 +1,34 @@
 #include "def_plugin_base.h"
+using namespace PlgDef;
 
-PlgDef::I_PluginBase::I_PluginBase():
+I_Configurable::I_Configurable():
     argsList(QHash<QString, QHash<QString, QString>>())
 {}
 
+I_Configurable::~I_Configurable()
+{
+
+}
+
+I_PluginBase::I_PluginBase()
+{
+
+}
+
 PlgDef::I_PluginBase::~I_PluginBase(){}
 
-QHash<QString, QHash<QString, QString> > PlgDef::I_PluginBase::getArgsList(){
+QHash<QString, QHash<QString, QString> > I_Configurable::getArgsList(){
     return this->argsList;
 }
 
-void PlgDef::I_PluginBase::defineArgs(const QString argsName, PlgDef::I_PluginBase::ArgsType typeItem){
+void I_Configurable::defineArgs(const QString argsName, I_Configurable::ArgsType typeItem){
     QString typeNum = QString("%1").arg(typeItem);
     auto tempHash = QHash<QString,QString>();
     tempHash.insert("type",typeNum);
     this->argsList.insert(argsName,tempHash);
 }
 
-void PlgDef::I_PluginBase::insertEnumItem(const QString argsName, const QString enumValue){
+void I_Configurable::insertEnumItem(const QString argsName, const QString enumValue){
     auto temp = this->argsList.find(argsName);
     if(temp == this->argsList.constEnd()){
         this->defineArgs(argsName,ArgsType::ENUM_ITEM);
@@ -35,3 +46,7 @@ void PlgDef::I_PluginBase::insertEnumItem(const QString argsName, const QString 
     auto index = QString("%1").arg(t_def.size());
     t_def.insert(index, enumValue);
 }
+
+PlgDef::I_Combiantion::I_Combiantion(){}
+
+PlgDef::I_Combiantion::~I_Combiantion(){}

@@ -10,7 +10,6 @@ namespace PlgDef {
         {
             Q_OBJECT
         private:
-            const QString plgName;
             QString filePath;
             QString pjtPath;
             Core::WsCore * core;
@@ -30,7 +29,6 @@ namespace PlgDef {
 
             virtual const QString registName() override;
             virtual PluginType pluginMark() override final;
-            virtual PluginType upStreamMark() override final;
             virtual QMenu *getCustomMenu() override;
             virtual void saveOperation() override
             {}

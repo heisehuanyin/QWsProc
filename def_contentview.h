@@ -16,7 +16,7 @@ namespace PlgDef {
     namespace ContentView {
         /**
         @brief 内容面板*/
-        class I_ContentView: public I_PluginBase
+        class I_ContentView: public I_Configurable,public I_Combiantion
         {
             Q_OBJECT
         public:
@@ -40,7 +40,7 @@ namespace PlgDef {
 
             // I_PluginBase interface
         public:
-            virtual PluginType pluginMark() override final;
+            virtual PlgDef::PluginType pluginMark() override final;
         };
     }
 }

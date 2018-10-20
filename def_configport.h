@@ -32,9 +32,8 @@ namespace PlgDef {
         QString DefaultWindowWidth_Key(QString groupID);
         QString DefaultWindowHeight_Key(QString groupID);
         QString EncodeFromMsg_4_KeyExport(QString msg);
-        QString WhetherSuffixIsProjectFile_Key(QString suffix);
 
-        class I_ConfigPort : public I_PluginBase
+        class I_ConfigPort : public I_Configurable
         {
             Q_OBJECT
 

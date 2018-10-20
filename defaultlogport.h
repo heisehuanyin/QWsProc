@@ -24,7 +24,6 @@ namespace PlgDef {
             // I_PluginBase interface
         public:
             virtual const QString registName() override;
-            virtual PluginType upStreamMark() override;
             virtual QMenu *getCustomMenu() override;
             virtual void saveOperation() override;
 

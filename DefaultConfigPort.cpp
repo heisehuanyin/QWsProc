@@ -21,11 +21,6 @@ DefaultConfigPort::DefaultConfigPort()
     }
 }
 
-PlgDef::PluginType DefaultConfigPort::upStreamMark()
-{
-    return PlgDef::IO_NoUpStream;
-}
-
 QMenu *DefaultConfigPort::getCustomMenu()
 {
     return nullptr;

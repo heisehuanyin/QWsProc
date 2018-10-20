@@ -209,8 +209,8 @@ void WsCore::operate_OpenFile(QString filePath, Cfg::I_ConfigPort *pjtcfg, Win::
         }
 
         CBase::PluginListNode *plglist = this->getAppointedPluginList(this->instance_GetMainConfigPort(),
-                                                               pjtcfg,
-                                                               filePath);
+                                                                      pjtcfg,
+                                                                      filePath);
 
         this->manager->operate_BuildChannel(filePath,
                                             this->manager->channel_getChannelId(pjtcfg),
@@ -307,8 +307,8 @@ PlgDef::Window::I_Window *WsCore::getActivedWindow()
 
 
 CBase::PluginListNode* WsCore::buildPluginList(QString keyExport,
-                                              QString procdef,
-                                              Cfg::I_ConfigPort* pjtCfg){
+                                               QString procdef,
+                                               Cfg::I_ConfigPort* pjtCfg){
 
     CBase::PluginListNode * rtn = nullptr;
     CBase::PluginListNode *parent = nullptr;
@@ -341,8 +341,8 @@ void WsCore::slot_OpenFileGloble()
 {
     auto activeW = this->getActivedWindow();
     auto list = QFileDialog::getOpenFileNames(activeW->getWidget(),
-                                  tr("选择打开文件"),
-                                  "/home");
+                                              tr("选择打开文件"),
+                                              "/home");
     for(int i = 0; i < list.length(); i++){
         auto path = list.at(i);
         this->operate_OpenFile(path, nullptr, activeW);
@@ -419,14 +419,16 @@ void WsCore::slot_SoftwareUpdate()
 {
 
 }
-void WsCore::customPane4ConfigPort(PlgDef::Window::I_Window* parent, PlgDef::ConfigPort::I_ConfigPort *customTarget)
+void WsCore::customPane4ConfigPort(PlgDef::Window::I_Window* parent,
+                                   PlgDef::ConfigPort::I_ConfigPort *customTarget,
+                                   QString filepathAtProject)
 {
     Win::I_Window *win = parent;
 
     CustomDialog preference(this, this->instance_GetMainConfigPort(), win->getWidget());
     if(customTarget){
         QString path = this->manager->channel_getChannelId(customTarget);
-        preference.setFileParserCustomPane(customTarget, path);
+        preference.setFileParserCustomPane(customTarget, path, filepathAtProject);
     }
     preference.exec();
 }
@@ -480,7 +482,10 @@ void WsCore::service_setPluginlistdefAtCfgport(CBase::PluginListNode *nodelist, 
     auto args = nodelist->getArgsList();
     cfgPort->setConfigList(keyStr, *args);
 
-    QString temp = cfgPort->getValue(keyStr);
+    QString temp("");
+    if(nodelist->getPreviousNode() != nullptr)
+        temp = cfgPort->getValue(keyStr);
+
     temp += nodelist->getPluginName();
     if(nodelist->getNextNode() != nullptr){
         temp += "=>";
@@ -492,8 +497,8 @@ void WsCore::service_setPluginlistdefAtCfgport(CBase::PluginListNode *nodelist, 
 }
 
 CBase::PluginListNode *Core::WsCore::getAppointedPluginList(PlgDef::ConfigPort::I_ConfigPort *frameConfig,
-                                                           PlgDef::ConfigPort::I_ConfigPort *projectConfig,
-                                                           QString filePath)
+                                                            PlgDef::ConfigPort::I_ConfigPort *projectConfig,
+                                                            QString filePath)
 {
     // Replace invalid string
     QString suffix = this->service_Proc4Suffix(filePath);
@@ -587,6 +592,20 @@ void WsCore::slot_Recieve_ProcessError(PlgDef::I_PluginBase * const resp, QStrin
     }
 }
 
+void WsCore::slot_Recieve_ProcessNomarlMsg(PlgDef::I_PluginBase * const res, QString msg)
+{
+    auto log = this->instance_GetDefaultLogPort();
+    log->writeLog(res, msg);
+
+    QString title("");
+    if(res)
+        title += res->registName();
+    else
+        title += "MainFrame";
+
+    QMessageBox::information(nullptr, title, msg, QMessageBox::Ok);
+}
+
 void WsCore::operate_LoadAllPlugins()
 {
     //TODO
@@ -633,8 +652,11 @@ void PluginManager::factory_RegisterPlugin(PlgDef::I_PluginBase *p)
         error += p->registName();
         error += " {Type:";
         error += QString("%1, ").arg(p->pluginMark());
-        error += "UpStream Type:";
-        error += QString("%1}").arg(p->upStreamMark());
+        if((p->pluginMark() | PlgDef::Feature_Combination) == p->pluginMark()){
+            error += "UpStream Type:";
+            error += QString("%1").arg(dynamic_cast<PlgDef::I_Combiantion*>(p)->upStreamMark());
+        }
+        error += "}";
 
         emit p->signal_PushErrorReport(p, error);
 
@@ -668,10 +690,10 @@ void PluginManager::operate_SaveOperation()
 }
 
 PlgDef::I_PluginBase* PluginManager::operate_BuildChannel(const QString filepath,
-                                         const QString projectpath,
-                                         CBase::PluginListNode * plglist,
-                                         PlgDef::I_PluginBase* upStream,
-                                         PlgDef::Window::I_Window* win)
+                                                          const QString projectpath,
+                                                          CBase::PluginListNode * plglist,
+                                                          PlgDef::I_PluginBase* upStream,
+                                                          PlgDef::Window::I_Window* win)
 {
     auto plgname = plglist->getPluginName();
     auto factory = this->factory_GetExistsFactory(plgname);
@@ -937,7 +959,11 @@ QHash<PlgDef::PluginType, QList<QPair<QString, PlgDef::PluginType>>> PluginManag
             listitor = rtn.find(plg_ptr->pluginMark());
         }
         auto &list = listitor.value();
-        list.append(QPair<QString, PlgDef::PluginType>(name, plg_ptr->upStreamMark()));
+        auto x = PlgDef::Feature_NoCombination;
+        if(plg_ptr->pluginMark() == (plg_ptr->pluginMark() | PlgDef::Feature_Combination))
+            x = dynamic_cast<PlgDef::I_Combiantion*>(plg_ptr)->upStreamMark();
+
+        list.append(QPair<QString, PlgDef::PluginType>(name, x));
     }
 
     return rtn;
@@ -960,13 +986,7 @@ QList<QPair<QString, PlgDef::PluginType> > PluginManager::service_QueryFactoryLi
 
 QList<QString> PluginManager::service_QueryChannelList()
 {
-    QList<QString> rtn;
-    for(auto itor = this->instances->constBegin();
-        itor != this->instances->constEnd();
-        ++itor){
-        rtn.append(itor.key());
-    }
-    return rtn;
+    return this->instances->keys();
 }
 
 PlgDef::I_PluginBase *Core::PluginManager::factory_GetExistsFactory(const QString key)

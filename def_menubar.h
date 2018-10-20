@@ -19,7 +19,7 @@ namespace PlgDef{
     namespace MenuBar{
         /**
         @brief 菜单栏*/
-        class I_MenuBar:public I_PluginBase{
+        class I_MenuBar:public I_Configurable{
             Q_OBJECT
         public:
             I_MenuBar();
@@ -37,7 +37,6 @@ namespace PlgDef{
             // I_PluginBase interface
         public:
             virtual PluginType pluginMark() override final;
-            virtual PluginType upStreamMark() override final;
         };
     }
 

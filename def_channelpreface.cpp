@@ -1,7 +1,7 @@
 #include "def_channelpreface.h"
+#include "def_configport.h"
 
-PlgDef::ChannelPreface::I_ChannelPreface::I_ChannelPreface():
-    plgName("ChannelPreface")
+PlgDef::ChannelPreface::I_ChannelPreface::I_ChannelPreface()
 {}
 
 PlgDef::ChannelPreface::I_ChannelPreface::~I_ChannelPreface()
@@ -28,16 +28,13 @@ QString PlgDef::ChannelPreface::I_ChannelPreface::getFilePath(){
 }
 
 const QString PlgDef::ChannelPreface::I_ChannelPreface::registName(){
-    return this->plgName;
+    return PlgDef::ConfigPort::DefaultChannelPreface_Value;
 }
 
 PlgDef::PluginType PlgDef::ChannelPreface::I_ChannelPreface::pluginMark(){
     return PlgDef::IO_ChannelPreface;
 }
 
-PlgDef::PluginType PlgDef::ChannelPreface::I_ChannelPreface::upStreamMark(){
-    return PlgDef::IO_NoUpStream;
-}
 
 QMenu *PlgDef::ChannelPreface::I_ChannelPreface::getCustomMenu(){
     return nullptr;

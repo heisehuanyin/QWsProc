@@ -5,7 +5,7 @@
 
 namespace PlgDef {
     namespace TextModel {
-        class I_TextModel:public I_PluginBase
+        class I_TextModel:public I_Configurable,public I_Combiantion
         {
             Q_OBJECT
         public:

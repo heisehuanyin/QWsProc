@@ -21,9 +21,6 @@ namespace PlgDef {
             virtual const QString registName() override {
                 return "PlainTextView";
             }
-            virtual PluginType upStreamMark() override {
-                return PlgDef::IO_TextModel;
-            }
             virtual QMenu *getCustomMenu() override;
             virtual void saveOperation() override;
 
@@ -40,6 +37,10 @@ namespace PlgDef {
             PlgDef::TextModel::I_TextModel *textmodel;
             QTextEdit *const editArea;
 
+
+            // I_CombinaUnit interface
+        public:
+            virtual PluginType upStreamMark() override;
         };
     }
 }

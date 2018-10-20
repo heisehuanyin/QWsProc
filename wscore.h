@@ -191,6 +191,14 @@ namespace Core {
 
         QList<QString> service_QueryChannelList();
 
+
+        /**
+         * @brief 获取已经存在的插件工厂
+         * @param key 插件注册名
+         * @return 插件实例生成器
+         */
+        PlgDef::I_PluginBase * factory_GetExistsFactory(const QString key);
+
     private:
         QHash<QString, PlgDef::I_PluginBase *> *const factories;
         QList<PlgDef::I_PluginBase *> *const key_ins;
@@ -200,13 +208,6 @@ namespace Core {
         QString configportName;
         QList<QString> pjtformats;
         QList<PlgDef::Window::I_Window*> winlist;
-
-        /**
-         * @brief 获取已经存在的插件工厂
-         * @param key 插件注册名
-         * @return 插件实例生成器
-         */
-        PlgDef::I_PluginBase * factory_GetExistsFactory(const QString key);
 
         /**
          * @brief 输入指定配置条目和默认配置值，获取插件实例生成器。若配置文件中条目为空，写入默认值
@@ -308,7 +309,9 @@ namespace Core {
          * @param groupId 窗口的groupid码
          * @param customTarget 目标配置端口
          */
-        void customPane4ConfigPort(PlgDef::Window::I_Window* parent, PlgDef::ConfigPort::I_ConfigPort * customTarget = nullptr);
+        void customPane4ConfigPort(PlgDef::Window::I_Window* parent,
+                                   PlgDef::ConfigPort::I_ConfigPort * customTarget = nullptr,
+                                   QString filePathAtProject=QString());
 
         QString service_Proc4Suffix(QString fullFilePath);
         QString service_ProcFilePath(QString fullFilePath, QString pjtFullFilePath);
@@ -338,6 +341,7 @@ namespace Core {
          * @param ignoreAllows 是否允许使用者忽略
          */
         void slot_Recieve_ProcessError(PlgDef::I_PluginBase *const res, const QString msg, bool ignoreAllows = false);
+        void slot_Recieve_ProcessNomarlMsg(PlgDef::I_PluginBase *const res, const QString msg);
 
         /**
          * @brief 默认全平台保存操作

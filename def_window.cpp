@@ -21,8 +21,3 @@ PlgDef::Window::I_Window::~I_Window() {}
 PlgDef::PluginType PlgDef::Window::I_Window::pluginMark(){
     return PlgDef::UI_Window;
 }
-
-PlgDef::PluginType PlgDef::Window::I_Window::upStreamMark()
-{
-    return PlgDef::IO_NoUpStream;
-}

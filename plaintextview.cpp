@@ -50,3 +50,7 @@ PlgDef::Window::I_Window *PlainTextView::getOwner()
 {
     return this->owner;
 }
+
+PlgDef::PluginType PlainTextView::upStreamMark() {
+    return PlgDef::IO_TextModel;
+}

@@ -5,7 +5,8 @@
 
 namespace PlgDef {
     namespace ProjectManager{
-        class I_ProjectManager: public I_PluginBase{
+        class I_ProjectManager: public I_Configurable,public I_Combiantion
+        {
         public:
             I_ProjectManager();
             virtual ~I_ProjectManager() override;

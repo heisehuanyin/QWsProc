@@ -8,7 +8,3 @@ I_MenuBar::~I_MenuBar() {}
 PlgDef::PluginType I_MenuBar::pluginMark(){
     return PlgDef::UI_MenuBar;
 }
-
-PlgDef::PluginType I_MenuBar::upStreamMark(){
-    return PlgDef::IO_NoUpStream;
-}

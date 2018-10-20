@@ -21,8 +21,3 @@ PlgDef::ConfigPort::I_ConfigPort::~I_ConfigPort() {}
 PlgDef::PluginType PlgDef::ConfigPort::I_ConfigPort::pluginMark(){
     return PlgDef::Service_ConfigPort;
 }
-
-QString PlgDef::ConfigPort::WhetherSuffixIsProjectFile_Key(QString suffix)
-{
-    return "file_parse." + suffix + ".filetype";
-}

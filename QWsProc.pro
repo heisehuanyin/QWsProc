@@ -25,6 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
+RC_ICONS = Victorinox.ico
+
 SOURCES += \
     defaultconfigport.cpp \
     defaultlogport.cpp \
@@ -76,3 +78,5 @@ DISTFILES += \
     README.md
 
 FORMS +=
+
+RESOURCES +=

@@ -24,7 +24,6 @@ namespace PlgDef {
             virtual const QString registName() override{
                 return "DefaultConfigPort";
             }
-            virtual PluginType upStreamMark() override;
             virtual QMenu *getCustomMenu() override;
             virtual void saveOperation() override;
 

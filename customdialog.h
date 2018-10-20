@@ -4,8 +4,10 @@
 #include "def_configport.h"
 
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDialog>
 #include <QHBoxLayout>
+#include <QItemDelegate>
 #include <QLineEdit>
 #include <QListView>
 #include <QPushButton>
@@ -14,6 +16,9 @@
 
 namespace Core {
     namespace CoreBase {
+        class FPP_TableDataModel;
+        class FPP_ListDataModel;
+
         class FileParsePanel : public QVBoxLayout{
             Q_OBJECT
         public:
@@ -24,34 +29,39 @@ namespace Core {
              * @brief 配置检索项目，设置配置目标为传入数据
              * @param fullFilePath 文件完全路径
              */
-            void config4File(QString fullFilePath);
-            void config4Suffix(QString suffix);
+            void config4Keywords(QString keywords);
 
         private:
             PlgDef::ConfigPort::I_ConfigPort *const _port;
             Core::WsCore *const core;
-            QCheckBox *const isSuffix;
+            QComboBox *const queryType;
             QLineEdit *const input;
             QPushButton *const click;
-            QTableView *const branches;
-            QPushButton *const addBranchMod;
-            QPushButton *const addViewBranch;
-            QPushButton *const removeBranch;
-            QListView *const arguments;
+            QTableView *const modules;
+            QLabel *const msg;
+            QListView *const argslist;
+            FPP_TableDataModel * tableModel;
+            FPP_ListDataModel *listModel;
+
 
         private slots:
-            void cfgCheck(int state);
+            void queryTypeChanged(int index);
+            void click_Query();
 
-            void setBranchTable();
-            void setArgsList();
-
-            void addBranchModule();
-            void addViewBranchM();
-            void removeBranchNext();
+            void currentChanged(const QModelIndex &current, const QModelIndex &previous);
         };
 
-        class FPP_BranchesDataModel: public QAbstractTableModel{
+        class FPP_TableDataModel: public QAbstractTableModel{
+            Q_OBJECT
 
+        public:
+            FPP_TableDataModel(Core::WsCore *core,
+                               QString keyString,
+                               CoreBase::PluginListNode* nodelist,
+                               PlgDef::ConfigPort::I_ConfigPort* port);
+            virtual ~FPP_TableDataModel() override;
+
+            virtual PluginListNode* getInnerNode(int row) const;
 
             // QAbstractItemModel interface
         public:
@@ -60,11 +70,66 @@ namespace Core {
             virtual QVariant data(const QModelIndex &index, int role) const override;
             virtual bool setData(const QModelIndex &index, const QVariant &value, int role) override;
             virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+            virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+        private:
+            QList<PluginListNode*> list;
+            Core::WsCore *const core;
+            QString keyString;
+            PlgDef::ConfigPort::I_ConfigPort *const _port;
+
+            // QAbstractItemModel interface
+        public:
             virtual bool insertRows(int row, int count, const QModelIndex &parent) override;
             virtual bool removeRows(int row, int count, const QModelIndex &parent) override;
+        };
+
+        class FPP_TableDelegate:public QItemDelegate
+        {
+            Q_OBJECT
+        public:
+            FPP_TableDelegate(Core::WsCore *core);
+            virtual ~FPP_TableDelegate() override;
+
+
+            // QAbstractItemDelegate interface
+        public:
+            virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+            virtual void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+            virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
+            virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+        private:
+            Core::WsCore *const core;
+        };
+
+        class FPP_ListDataModel: public QAbstractListModel
+        {
+            Q_OBJECT
+        public:
+            FPP_ListDataModel(PluginListNode* target, PlgDef::I_Configurable *factory);
+            virtual ~FPP_ListDataModel() override;
+
+            // QAbstractItemModel interface
+        public:
+            virtual int rowCount(const QModelIndex &parent) const override;
+            virtual QVariant data(const QModelIndex &index, int role) const override;
+            virtual bool setData(const QModelIndex &index, const QVariant &value, int role) override;
             virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+        private:
+            PluginListNode *const target;
+            PlgDef::I_Configurable *factory;
+        };
+
+        class FPP_ListDelegate:public QItemDelegate{
+            Q_OBJECT
+        public:
+            FPP_ListDelegate();
         };
     }
+
+
     class CustomDialog : public QDialog
     {
         Q_OBJECT
@@ -89,6 +154,8 @@ namespace Core {
         QWidget*const uicfg;
         QWidget*const g_cfg;
         Core::WsCore *const core;
+        QLineEdit *const defaultpath;
+        QPushButton *const explor;
 
     private slots:
         void defaultWindowType(const QString type);

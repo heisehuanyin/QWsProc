@@ -125,7 +125,6 @@ namespace PlgDef {
         public:
             virtual PluginType pluginMark() override final;
 
-            virtual PluginType upStreamMark() override final;
         };
 
 

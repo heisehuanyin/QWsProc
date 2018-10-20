@@ -9,7 +9,7 @@ namespace PlgDef {
 
     namespace LogPort {
 
-        class I_LogPort : public I_PluginBase
+        class I_LogPort : public I_Configurable
         {
             Q_OBJECT
 

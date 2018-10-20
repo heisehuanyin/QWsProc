@@ -16,7 +16,8 @@ int main(int argc, char *argv[])
     if(argc == 2 && QString("-print") == argv[1]){
         app->service_OpenSilentModel();
         auto m = app->service_getManager();
-        std::cout<<"PlgDef::IO_NoUpStream === "<< PlgDef::IO_NoUpStream <<std::endl;
+        std::cout<<"PlgDef::Feature_NoCombination === "<< PlgDef::Feature_NoCombination <<std::endl;
+        std::cout<<"PlgDef::Feature_Combination   === "<< PlgDef::Feature_Combination   <<std::endl;
 
         auto lists = m->service_QueryFactoryList();
         __printPluginList(lists);

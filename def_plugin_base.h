@@ -5,23 +5,27 @@
 
 namespace PlgDef{
     enum PluginType{
-        UI_MenuBar,
-        UI_ToolBar,
-        UI_StateBar,
-        UI_Window,
-        UI_ContentView,
-        UI_FloatPanel,
+        Feature_NoCombination = 0x00000000,
+        Feature_Combination   = 0x00000001,
+        Feature_Configurable  = 0x00000010,
 
-        IO_NoUpStream,
-        IO_ChannelPreface,
-        IO_TextModel,
-        IO_TreeModel,
-        IO_TableModel,
-        IO_StyleModel,
+        UI_MenuBar    = 0x10010000 | Feature_Configurable,
+        UI_ToolBar    = 0x10020000 | Feature_Configurable,
+        UI_StateBar   = 0x10030000 | Feature_Configurable,
+        UI_Window     = 0x10040000,
+        UI_ContentView= 0x10050000 | Feature_Configurable | Feature_Combination,
+        UI_FloatPanel = 0x10060000,
 
-        Service_ConfigPort,
-        Service_LogPort,
-        Service_ProjectManager,
+        IO_ChannelPreface       = 0x20010000,
+        IO_TextModel            = 0x20020000 | Feature_Combination | Feature_Configurable,
+        IO_TreeModel            = 0x20030000 | Feature_Combination | Feature_Configurable,
+        IO_TableModel           = 0x20040000 | Feature_Combination | Feature_Configurable,
+        IO_StyleModel           = 0x20050000 | Feature_Combination | Feature_Configurable,
+        Service_ProjectManager  = 0x20060000 | Feature_Combination | Feature_Configurable,
+
+        Service_ConfigPort = 0x30010000 | Feature_Configurable,
+        Service_LogPort    = 0x30020000 | Feature_Configurable,
+
     };
 
     /**
@@ -48,12 +52,6 @@ namespace PlgDef{
         virtual PlgDef::PluginType pluginMark() = 0;
 
         /**
-         * @brief 上游插件的类别
-         * @return 插件类别标志
-         */
-        virtual PlgDef::PluginType upStreamMark() = 0;
-
-        /**
          * @brief 获取插件自定义的菜单
          * @return 插件菜单,如果插件不提供配置菜单，返回nullptr
          */
@@ -63,6 +61,29 @@ namespace PlgDef{
          * @brief 插件自身保存操作
          */
         virtual void saveOperation() = 0;
+
+    signals:
+        /**
+         * @brief 所有插件共有的信号，用于报告插件内部错误
+         * @param resp 发生问题的插件
+         * @param msg 错误相关信息
+         */
+        void signal_PushErrorReport(PlgDef::I_PluginBase *const resp, const QString msg, bool ignoreAllows = false);
+    };
+
+    class I_Combiantion{
+    public:
+        I_Combiantion();
+        virtual ~I_Combiantion();
+
+        virtual PlgDef::PluginType upStreamMark() = 0;
+    };
+
+    class I_Configurable:public I_PluginBase
+    {
+    public:
+        I_Configurable();
+        virtual ~I_Configurable();
 
         /**
          * @brief 获取插件参数列表<argsName, <key, val>>,key=["type","1","2","3",...],二级列表中type的值直接关联ArgsType类型
@@ -92,14 +113,6 @@ namespace PlgDef{
 
     private:
         QHash<QString, QHash<QString, QString>> argsList;
-
-    signals:
-        /**
-         * @brief 所有插件共有的信号，用于报告插件内部错误
-         * @param resp 发生问题的插件
-         * @param msg 错误相关信息
-         */
-        void signal_PushErrorReport(PlgDef::I_PluginBase *const resp, const QString msg, bool ignoreAllows = false);
     };
 }
 
