@@ -46,18 +46,22 @@ namespace Core {
             QPushButton *const click;
             QTableView *const modules;
             QLabel *const msg;
+            QPushButton *const cfgCheck;
             QListView *const argslist;
             FPP_TableDataModel * tableModel;
+
             FPP_ListDataModel *listModel;
             FPP_ListDelegate * listDelegate;
 
 
 
         private slots:
-            void queryTypeChanged(int index);
-            void click_Query();
+            void slot_QueryTypeChanged(int index);
+            void slot_Click_Query();
+            void slot_ConfigResultSave();
 
-            void currentChanged(const QModelIndex &current, const QModelIndex &previous);
+            void slot_TableCurrentSelectedChanged(const QModelIndex &current, const QModelIndex &previous);
+
         };
 
         class FPP_TableDataModel: public QAbstractTableModel{
@@ -65,12 +69,15 @@ namespace Core {
 
         public:
             FPP_TableDataModel(Core::WsCore *core,
-                               QString keyString,
-                               CoreBase::PluginListNode* nodelist,
                                PlgDef::ConfigPort::I_ConfigPort* port);
             virtual ~FPP_TableDataModel() override;
 
-            virtual PluginListNode* getInnerNode(int row) const;
+            PluginListNode* getInnerNode(int row) const;
+            bool saveConfigResult();
+
+            void refreshTableModel(QString keyString, CoreBase::PluginListNode* nodelist);
+        signals:
+            void signal_SaveOperateEnable(bool enable);
 
             // QAbstractItemModel interface
         public:
@@ -116,8 +123,10 @@ namespace Core {
         {
             Q_OBJECT
         public:
-            FPP_ListDataModel(PluginListNode* target, PlgDef::I_Configurable *factory);
+            FPP_ListDataModel();
             virtual ~FPP_ListDataModel() override;
+
+            void refreshDataModel(PluginListNode* target, PlgDef::I_Configurable *factory);
 
             // QAbstractItemModel interface
         public:
@@ -127,7 +136,7 @@ namespace Core {
             virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
 
         private:
-            PluginListNode *const target;
+            PluginListNode *target;
             PlgDef::I_Configurable *factory;
         };
 

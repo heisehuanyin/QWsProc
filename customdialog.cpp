@@ -183,6 +183,7 @@ FileParsePanel::FileParsePanel(Core::WsCore *core, PlgDef::ConfigPort::I_ConfigP
     click(new QPushButton(tr("查询"))),
     modules(new QTableView),
     msg(new QLabel(":")),
+    cfgCheck(new QPushButton(tr("应用"))),
     argslist(new QListView),
     tableModel(nullptr),
     listModel(nullptr)
@@ -195,10 +196,10 @@ FileParsePanel::FileParsePanel(Core::WsCore *core, PlgDef::ConfigPort::I_ConfigP
     auto _1row = new QGridLayout;
     _1row->addWidget(this->queryType, 0,0,1,1);
     this->connect(this->queryType, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-                  this, &FileParsePanel::queryTypeChanged);
+                  this, &FileParsePanel::slot_QueryTypeChanged);
     _1row->addWidget(this->input,0,1,1,3);
     _1row->addWidget(this->click, 0, 4);
-    this->connect(this->click, &QPushButton::clicked, this, &FileParsePanel::click_Query);
+    this->connect(this->click, &QPushButton::pressed, this, &FileParsePanel::slot_Click_Query);
     this->addLayout(_1row);
     this->setStretchFactor(_1row, 0);
 
@@ -207,12 +208,30 @@ FileParsePanel::FileParsePanel(Core::WsCore *core, PlgDef::ConfigPort::I_ConfigP
     _2row->addWidget(this->argslist);
 
     this->addWidget(_2row);
-    this->addWidget(this->msg);
 
+    auto _3row = new QHBoxLayout;
+    _3row->addWidget(this->msg);
+    _3row->addWidget(this->cfgCheck);
+    this->cfgCheck->setEnabled(false);
+    this->connect(this->cfgCheck, &QPushButton::pressed, this, &FileParsePanel::slot_ConfigResultSave);
+    this->addLayout(_3row);
+
+    this->tableModel = new FPP_TableDataModel(this->core, this->_port);
+    this->modules->setModel(tableModel);
     auto *d(new FPP_TableDelegate(this->core));
     this->modules->setItemDelegateForColumn(1,d);
+
+    this->listModel = new FPP_ListDataModel();
+    this->argslist->setModel(this->listModel);
     this->listDelegate = new FPP_ListDelegate();
     this->argslist->setItemDelegate(this->listDelegate);
+
+    this->connect(this->tableModel, &FPP_TableDataModel::signal_SaveOperateEnable,
+                  this->cfgCheck, &QPushButton::setEnabled);
+
+    auto selectModel = this->modules->selectionModel();
+    this->connect(selectModel, &QItemSelectionModel::currentChanged,
+                  this, &FileParsePanel::slot_TableCurrentSelectedChanged);
 }
 
 FileParsePanel::~FileParsePanel(){
@@ -233,14 +252,8 @@ void FileParsePanel::config4Keywords(QString key)
         list = new CoreBase::PluginListNode(tr("填写值__双击编辑__"),nullptr);
     }
     this->msg->setText(strResult);
-    if(this->tableModel)
-        delete this->tableModel;
-    this->tableModel = new FPP_TableDataModel(this->core, key, list, this->_port);
-    this->modules->setModel(this->tableModel);
-
-    auto selectModel = this->modules->selectionModel();
-    this->connect(selectModel, &QItemSelectionModel::currentChanged,
-                  this, &FileParsePanel::currentChanged);
+    this->cfgCheck->setEnabled(false);
+    this->tableModel->refreshTableModel(key, list);
 }
 
 void FileParsePanel::outSetFilePathIndependentConfig(QString filepath)
@@ -250,7 +263,7 @@ void FileParsePanel::outSetFilePathIndependentConfig(QString filepath)
     this->click->click();
 }
 
-void FileParsePanel::queryTypeChanged(int index)
+void FileParsePanel::slot_QueryTypeChanged(int index)
 {
     this->input->setReadOnly(false);
     if(index == 0){
@@ -271,7 +284,7 @@ void FileParsePanel::queryTypeChanged(int index)
     }
 }
 
-void FileParsePanel::click_Query()
+void FileParsePanel::slot_Click_Query()
 {
     auto text = this->input->text();
     int type = this->queryType->currentIndex();
@@ -297,7 +310,20 @@ void FileParsePanel::click_Query()
     this->modules->resizeColumnsToContents();
 }
 
-void FileParsePanel::currentChanged(const QModelIndex &current, const QModelIndex &)
+void FileParsePanel::slot_ConfigResultSave()
+{
+    if(this->tableModel){
+        auto result = this->tableModel->saveConfigResult();
+        if(result)
+            this->msg->setText("配置成功");
+        else
+            this->msg->setText("配置结果错误：Table配置未完成");
+    }else{
+        this->msg->setText("配置过程出错：Table模型未建立");
+    }
+}
+
+void FileParsePanel::slot_TableCurrentSelectedChanged(const QModelIndex &current, const QModelIndex &)
 {
     //=====================================
     auto model = current.model();
@@ -311,11 +337,7 @@ void FileParsePanel::currentChanged(const QModelIndex &current, const QModelInde
         return;
     if((f->pluginMark() | PlgDef::Feature_Configurable) == f->pluginMark()){
         auto factory = dynamic_cast<PlgDef::I_Configurable*>(f);
-        auto nlm = new FPP_ListDataModel(node, factory);
-        this->argslist->setModel(nlm);
-        if(this->listModel)
-            delete this->listModel;
-        this->listModel = nlm;
+        this->listModel->refreshDataModel(node, factory);
         this->listDelegate->refreshListViewDelegate(node, factory);
     }
     else{
@@ -327,19 +349,10 @@ void FileParsePanel::currentChanged(const QModelIndex &current, const QModelInde
 
 
 FPP_TableDataModel::FPP_TableDataModel(Core::WsCore * core,
-                                       QString keyString,
-                                       PluginListNode *nodelist,
                                        Cfg::I_ConfigPort* port):
     core(core),
     _port(port)
-{
-    for(auto node = nodelist;node != nullptr;node = node->getNextNode()){
-        if(this->list.size() > 0)
-            this->list.at(0)->setNextNode(nullptr);
-        this->list.insert(0,node);
-    }
-    this->keyString = keyString;
-}
+{}
 
 FPP_TableDataModel::~FPP_TableDataModel()
 {
@@ -353,6 +366,45 @@ FPP_TableDataModel::~FPP_TableDataModel()
 PluginListNode *FPP_TableDataModel::getInnerNode(int row) const
 {
     return this->list.at(row);
+}
+
+bool FPP_TableDataModel::saveConfigResult()
+{
+    if(this->list.last()->getPluginName() != PlgDef::ConfigPort::DefaultChannelPreface_Value)
+        return false;
+    PluginListNode* listdef = nullptr;
+    PluginListNode* _previous = nullptr;
+    for(int i=0; i<this->list.length(); ++i){
+        int target_index = this->list.length()-1 -i;
+        auto templateNode = this->list.at(target_index);
+        auto newNode = new PluginListNode(templateNode->getPluginName(), _previous);
+        newNode->mergeArgsList(*templateNode->getArgsList());
+        if(_previous){
+            _previous->setNextNode(newNode);
+        }else {
+            listdef = newNode;
+        }
+        _previous = newNode;
+    }
+
+    this->core->service_setPluginlistdefAtCfgport(listdef, this->keyString, this->_port);
+    this->core->slot_Recieve_ProcessNomarlMsg(nullptr, "配置写入完成");
+
+    delete listdef;
+    return true;
+}
+
+void FPP_TableDataModel::refreshTableModel(QString keyString, PluginListNode *nodelist)
+{
+    this->beginResetModel();
+    this->list.clear();
+    for(auto node = nodelist;node != nullptr;node = node->getNextNode()){
+        if(this->list.size() > 0)
+            this->list.at(0)->setNextNode(nullptr);
+        this->list.insert(0,node);
+    }
+    this->keyString = keyString;
+    this->endResetModel();
 }
 
 int FPP_TableDataModel::rowCount(const QModelIndex &parent) const
@@ -385,8 +437,9 @@ QVariant FPP_TableDataModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-bool FPP_TableDataModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool FPP_TableDataModel::setData(const QModelIndex &index, const QVariant &value, int )
 {
+    emit this->signal_SaveOperateEnable(false);
     int i_index = index.row();
     int count = this->list.length() - i_index;
     this->removeRows(i_index, count, index.parent());
@@ -395,23 +448,7 @@ bool FPP_TableDataModel::setData(const QModelIndex &index, const QVariant &value
     this->list.replace(this->list.length()-1, node);
 
     if(value.toString() == PlgDef::ConfigPort::DefaultChannelPreface_Value){
-        PluginListNode* _node = this->list.last();
-        PluginListNode* _temp = _node;
-
-        for(int i=1; i< this->list.length(); ++i){
-            int targetindex = this->list.length() - 1 - i;
-            auto _tmp = list.at(targetindex);
-            auto x = new PluginListNode(_tmp->getPluginName(), _temp);
-            x->mergeArgsList(*_tmp->getArgsList());
-            this->list.replace(targetindex, x);
-            _tmp->setNextNode(nullptr);
-            delete _tmp;
-            _temp->setNextNode(x);
-            _temp = x;
-        }
-
-        this->core->service_setPluginlistdefAtCfgport(_node, this->keyString, this->_port);
-        this->core->slot_Recieve_ProcessNomarlMsg(nullptr, "配置写入完成");
+        emit this->signal_SaveOperateEnable(true);
     }else{
         this->insertRows(i_index+1, 1, index.parent());
     }
@@ -518,9 +555,9 @@ void FPP_TableDelegate::updateEditorGeometry(QWidget *editor, const QStyleOption
     editor->setGeometry(option.rect);
 }
 
-FPP_ListDataModel::FPP_ListDataModel(PluginListNode *target,PlgDef::I_Configurable *factory):
-    target(target),
-    factory(factory)
+FPP_ListDataModel::FPP_ListDataModel():
+    target(nullptr),
+    factory(nullptr)
 {}
 
 FPP_ListDataModel::~FPP_ListDataModel()
@@ -528,8 +565,18 @@ FPP_ListDataModel::~FPP_ListDataModel()
 
 }
 
+void FPP_ListDataModel::refreshDataModel(PluginListNode *target, PlgDef::I_Configurable *factory)
+{
+    this->beginResetModel();
+    this->target = target;
+    this->factory = factory;
+    this->endResetModel();
+}
+
 int FPP_ListDataModel::rowCount(const QModelIndex &) const
 {
+    if(!this->factory)
+        return 0;
     auto args = this->factory->getArgsList();
     return args.size() * 2;
 }
@@ -588,7 +635,10 @@ FPP_ListDelegate::~FPP_ListDelegate()
 void FPP_ListDelegate::refreshListViewDelegate(PluginListNode *target, PlgDef::I_Configurable *factory)
 {
     this->target = target;
-    this->defargslist = factory->getArgsList();
+    if(factory)
+        this->defargslist = factory->getArgsList();
+    else
+        this->defargslist.clear();
 }
 
 QWidget *FPP_ListDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const
