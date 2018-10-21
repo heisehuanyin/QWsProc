@@ -407,9 +407,8 @@ namespace Core {
         void slot_ViewChanges(QAction* act);
         //Preference
         void slot_MainConfigPanel();
+        void slot_IndependentConfig(QAction *act);
         void slot_PluginManager();
-        void slot_ProjectConfig();
-        void slot_DocumentConfig();
         //Help
         void slot_SoftwareAbout();
         void slot_HelpContent();

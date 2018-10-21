@@ -74,7 +74,7 @@ void WsCore::service_RefreshComponents(PlgDef::Window::I_Window *win)
     QMenu * _new = new QMenu(tr("新建"), m_File);
     this->connect(_new, &QMenu::triggered, this, &WsCore::slot_NewFileGloble);
     m_File->addMenu(_new);
-    QMenu * _close = new QMenu(tr("关闭"), m_File);
+    QMenu * _close = new QMenu(tr("不保存关闭"), m_File);
     this->connect(_close, &QMenu::triggered, this, &WsCore::slot_CloseFileGloble);
     m_File->addMenu(_close);
     for(auto itor= allviews.constBegin();
@@ -121,8 +121,15 @@ void WsCore::service_RefreshComponents(PlgDef::Window::I_Window *win)
     this->connect(_setting, &QAction::triggered, this, &WsCore::slot_MainConfigPanel);
     m_Preference->addAction(_setting);
     QMenu * _pcfg = new QMenu(tr("独立配置"), m_Preference);
-    this->connect(_pcfg, &QMenu::triggered, this, &WsCore::slot_ProjectConfig);
+    this->connect(_pcfg, &QMenu::triggered, this, &WsCore::slot_IndependentConfig);
     m_Preference->addMenu(_pcfg);
+    for(auto itor = allviews.constBegin();
+        itor != allviews.constEnd();
+        ++itor){
+        auto id = this->manager->channel_getChannelId(*itor);
+        QAction *one = new QAction(id, _pcfg);
+        _pcfg->addAction(one);
+    }
     m_Preference->addSeparator();
     QAction * _plgmgr = new QAction(tr("插件管理"), m_Preference);
     this->connect(_plgmgr,&QAction::triggered, this, &WsCore::slot_PluginManager);
@@ -364,7 +371,7 @@ void WsCore::slot_CloseFileGloble(QAction* act)
         itor != c->constEnd();
         ++itor){
         if((*itor)->pluginMark() == PlgDef::UI_ContentView){
-            this->operate_CloseContentView(dynamic_cast<CView::I_ContentView*>(*itor));
+            this->operate_CloseContentView(dynamic_cast<CView::I_ContentView*>(*itor), false);
             break;
         }
     }
@@ -391,15 +398,17 @@ void WsCore::slot_MainConfigPanel()
     auto x = this->getActivedWindow();
     this->customPane4ConfigPort(x, nullptr);
 }
+
+void WsCore::slot_IndependentConfig(QAction *act)
+{
+    auto aw = this->getActivedWindow();
+    auto id = act->text();
+    auto pjtm = this->getProjectConfigPort(this->manager->
+                                           channel_GetExistsChannel(id)->
+                                           at(0));
+    this->customPane4ConfigPort(aw, pjtm, id);
+}
 void WsCore::slot_PluginManager()
-{
-
-}
-void WsCore::slot_ProjectConfig()
-{
-
-}
-void WsCore::slot_DocumentConfig()
 {
 
 }
@@ -480,7 +489,7 @@ QString WsCore::service_getPluginlistdefAtCfgport(QString keyStr, PlgDef::Config
 void WsCore::service_setPluginlistdefAtCfgport(CBase::PluginListNode *nodelist, QString keyStr, PlgDef::ConfigPort::I_ConfigPort *cfgPort)
 {
     auto args = nodelist->getArgsList();
-    cfgPort->setConfigList(keyStr, *args);
+    cfgPort->setConfigList(keyStr+"."+nodelist->getPluginName(), *args);
 
     QString temp("");
     if(nodelist->getPreviousNode() != nullptr)
@@ -603,7 +612,7 @@ void WsCore::slot_Recieve_ProcessNomarlMsg(PlgDef::I_PluginBase * const res, QSt
     else
         title += "MainFrame";
 
-    QMessageBox::information(nullptr, title, msg, QMessageBox::Ok);
+    QMessageBox::information(nullptr, title, msg);
 }
 
 void WsCore::operate_LoadAllPlugins()

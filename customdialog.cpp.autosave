@@ -396,18 +396,17 @@ bool FPP_TableDataModel::setData(const QModelIndex &index, const QVariant &value
 
     if(value.toString() == PlgDef::ConfigPort::DefaultChannelPreface_Value){
         PluginListNode* _node = this->list.last();
-        PluginListNode* _temp = _node;
+        PluginListNode* previous = _node;
 
         for(int i=1; i< this->list.length(); ++i){
             int targetindex = this->list.length() - 1 - i;
-            auto _tmp = list.at(targetindex);
-            auto x = new PluginListNode(_tmp->getPluginName(), _temp);
-            x->mergeArgsList(*_tmp->getArgsList());
-            this->list.replace(targetindex, x);
-            _tmp->setNextNode(nullptr);
-            delete _tmp;
-            _temp->setNextNode(x);
-            _temp = x;
+            auto oldNode = list.at(targetindex);
+            auto newNode = new PluginListNode(oldNode->getPluginName(), previous);
+            newNode->mergeArgsList(*oldNode->getArgsList());
+            this->list.replace(targetindex, newNode);
+            delete oldNode;
+            previous->setNextNode(newNode);
+            previous = newNode;
         }
 
         this->core->service_setPluginlistdefAtCfgport(_node, this->keyString, this->_port);

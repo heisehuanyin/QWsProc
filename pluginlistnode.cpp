@@ -10,7 +10,8 @@ PluginListNode::PluginListNode(const QString plgRName, PluginListNode *previous)
 {}
 
 PluginListNode::~PluginListNode(){
-    delete this->nextnode;
+    if(nextnode)
+        delete nextnode;
     delete xargs;
 }
 

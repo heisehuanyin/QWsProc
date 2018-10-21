@@ -18,6 +18,7 @@ namespace Core {
     namespace CoreBase {
         class FPP_TableDataModel;
         class FPP_ListDataModel;
+        class FPP_ListDelegate;
 
         class FileParsePanel : public QVBoxLayout{
             Q_OBJECT
@@ -31,6 +32,12 @@ namespace Core {
              */
             void config4Keywords(QString keywords);
 
+            /**
+             * @brief 通过面板实例在外部对面板配置对象重设置为特定项目特定文件路径
+             * @param filepath 文件路径
+             */
+            void outSetFilePathIndependentConfig(QString filepath);
+
         private:
             PlgDef::ConfigPort::I_ConfigPort *const _port;
             Core::WsCore *const core;
@@ -42,6 +49,8 @@ namespace Core {
             QListView *const argslist;
             FPP_TableDataModel * tableModel;
             FPP_ListDataModel *listModel;
+            FPP_ListDelegate * listDelegate;
+
 
 
         private slots:
@@ -126,6 +135,20 @@ namespace Core {
             Q_OBJECT
         public:
             FPP_ListDelegate();
+            virtual ~FPP_ListDelegate();
+
+            void refreshListViewDelegate(PluginListNode* target, PlgDef::I_Configurable *factory);
+
+        private:
+            PluginListNode *target;
+            QHash<QString,QHash<QString,QString>> defargslist;
+
+            // QAbstractItemDelegate interface
+        public:
+            virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+            virtual void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+            virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
+            virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
         };
     }
 
