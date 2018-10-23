@@ -1,5 +1,5 @@
-#ifndef DEFLOGPORT_H
-#define DEFLOGPORT_H
+#ifndef DEF_LOGPORT_H
+#define DEF_LOGPORT_H
 #include "def_plugin_base.h"
 #include "wscore.h"
 

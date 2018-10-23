@@ -1,5 +1,5 @@
-#ifndef DEFCONTENTVIEW_H
-#define DEFCONTENTVIEW_H
+#ifndef DEF_CONTENTVIEW_H
+#define DEF_CONTENTVIEW_H
 
 #include "def_plugin_base.h"
 #include "wscore.h"

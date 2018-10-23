@@ -46,7 +46,10 @@ SOURCES += \
     customdialog.cpp \
     defaultmenubar.cpp \
     def_menubar.cpp \
-    projectmanager.cpp
+    def_projectmanager.cpp \
+    wsnovelmanager.cpp \
+    projectview.cpp \
+    newfiledialog.cpp
 
 HEADERS += \
     def_channelpreface.h \
@@ -66,7 +69,10 @@ HEADERS += \
     pluginlistnode.h \
     customdialog.h \
     defaultmenubar.h \
-    projectmanager.h
+    def_projectmanager.h \
+    wsnovelmanager.h \
+    projectview.h \
+    newfiledialog.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

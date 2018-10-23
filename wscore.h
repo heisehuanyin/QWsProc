@@ -28,6 +28,9 @@ namespace PlgDef {
     namespace MenuBar {
         class I_MenuBar;
     }
+    namespace ProjectManager{
+        class I_ProjectManager;
+    }
 }
 
 
@@ -143,6 +146,17 @@ namespace Core {
          */
         PlgDef::TextModel::I_TextModel *instance_GetTextModel(const QString factory_id,
                                                               PlgDef::I_PluginBase *upStream, QHash<QString, QString> xargs);
+
+        /**
+         * @brief 获取一个项目管理器实例
+         * @param factory_id 插件注册id
+         * @param upStream 上游插件
+         * @param xargs 参数列表
+         * @return 实例
+         */
+        PlgDef::ProjectManager::I_ProjectManager* instance_GetProjectManager(const QString factory_id,
+                                                                             PlgDef::I_PluginBase *upStream,
+                                                                             QHash<QString,QString> xargs);
 
         /**
          * @brief 获取一个内容视图实例
@@ -263,6 +277,16 @@ namespace Core {
          * @param win 发出请求的窗口
          */
         void operate_OpenFile(const QString filePath, PlgDef::ConfigPort::I_ConfigPort* prjcfg = nullptr, PlgDef::Window::I_Window *win = nullptr);
+
+        /**
+         * @brief 为指定项目管理添加一个文件，
+         * 如果指定ProjectManager，直接添加文件到对应的项目管理，否则需要手动选择项目
+         * 如果指定项目管理的groupName，直接添加入对应的Group，否则需要手动选择Group
+         * @param fileTemplateName 文件模板名称，此模板由框架提供
+         * @param pjtManager 项目管理实例
+         * @param groupName 项目管理的Group名称，从其avaliablegroups中获取
+         */
+        void operate_NewFile(QString fileTemplateName, PlgDef::ProjectManager::I_ProjectManager* pjtManager=nullptr, QString groupName = QString());
 
         /**
          * @brief 关闭指定ContentView
@@ -400,7 +424,8 @@ namespace Core {
     private slots:
         //File
         void slot_OpenFileGloble();
-        void slot_NewFileGloble(QAction* act);
+        void slot_NewProject(QAction* act);
+        void slot_NewFile(QAction* act);
         void slot_PrintGloble(QAction* act);
         void slot_CloseFileGloble(QAction* act);
         //Views

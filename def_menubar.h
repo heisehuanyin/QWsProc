@@ -1,5 +1,5 @@
-#ifndef DEFMENUBAR_H
-#define DEFMENUBAR_H
+#ifndef DEF_MENUBAR_H
+#define DEF_MENUBAR_H
 
 #include "def_plugin_base.h"
 

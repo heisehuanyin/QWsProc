@@ -41,6 +41,8 @@ namespace PlgDef {
             // I_CombinaUnit interface
         public:
             virtual PluginType upStreamMark() override;
+            virtual QWidget *reloadContentAndReturnSetupWidget() override;
+
         };
     }
 }

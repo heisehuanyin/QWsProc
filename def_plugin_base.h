@@ -1,5 +1,5 @@
-#ifndef DEFPLUGIN_BASE_H
-#define DEFPLUGIN_BASE_H
+#ifndef DEF_PLUGIN_BASE_H
+#define DEF_PLUGIN_BASE_H
 
 #include <QMenu>
 
@@ -77,6 +77,15 @@ namespace PlgDef{
         virtual ~I_Combiantion();
 
         virtual PlgDef::PluginType upStreamMark() = 0;
+
+        /**
+         * @brief 重新载入上游插件内容，返回设置面板，用于设置插件状态。典型应用新建过程
+         * 如果返回nullptr,则代表着放弃配置过程
+         * 通过面板设置的状态都是临时状态，持久化状态需要通过获取ConfigPort来存储。
+         * ConfigPort可以存储初始化参数，也可以存储插件自定义参数。
+         * @return 配置面板
+         */
+        virtual QWidget* reloadContentAndReturnSetupWidget() = 0;
     };
 
     class I_Configurable:public I_PluginBase

@@ -5,14 +5,16 @@
 #include "def_textmodel.h"
 #include "def_contentview.h"
 #include "def_menubar.h"
-#include "projectmanager.h"
+#include "def_projectmanager.h"
 
 #include "defaultlogport.h"
 #include "defaultconfigport.h"
 #include "defaulttextmodel.h"
 #include "plaintextview.h"
+#include "projectview.h"
 #include "singalview.h"
 #include "defaultmenubar.h"
+#include "wsnovelmanager.h"
 
 #include "customdialog.h"
 
@@ -71,9 +73,12 @@ void WsCore::service_RefreshComponents(PlgDef::Window::I_Window *win)
     QAction * _open = new QAction(tr("打开"), m_File);
     this->connect(_open, &QAction::triggered, this, &WsCore::slot_OpenFileGloble);
     m_File->addAction(_open);
-    QMenu * _new = new QMenu(tr("新建"), m_File);
-    this->connect(_new, &QMenu::triggered, this, &WsCore::slot_NewFileGloble);
-    m_File->addMenu(_new);
+    QMenu * _newPjt = new QMenu(tr("新建项目"), m_File);
+    this->connect(_newPjt, &QMenu::triggered, this, &WsCore::slot_NewProject);
+    QMenu * _newFile = new QMenu(tr("新建文件"), m_File);
+    this->connect(_newFile, &QMenu::triggered, this, &WsCore::slot_NewFile);
+    m_File->addMenu(_newPjt);
+    m_File->addMenu(_newFile);
     QMenu * _close = new QMenu(tr("不保存关闭"), m_File);
     this->connect(_close, &QMenu::triggered, this, &WsCore::slot_CloseFileGloble);
     m_File->addMenu(_close);
@@ -355,7 +360,12 @@ void WsCore::slot_OpenFileGloble()
         this->operate_OpenFile(path, nullptr, activeW);
     }
 }
-void WsCore::slot_NewFileGloble(QAction* act)
+
+void WsCore::slot_NewProject(QAction *act)
+{
+
+}
+void WsCore::slot_NewFile(QAction* act)
 {
     std::cout<<"newfile"<<std::endl;
 }
@@ -627,8 +637,11 @@ void WsCore::operate_InitDefaultPlugins()
 
     this->service_RegisterPlugin(new PlgDef::ChannelPreface::I_ChannelPreface);
     this->service_RegisterPlugin(new PlgDef::TextModel::DefaultTextModel);
+    this->service_RegisterPlugin(new PlgDef::ProjectManager::WsNovelProjectManager);
 
     this->service_RegisterPlugin(new CView::PlainTextView);
+    this->service_RegisterPlugin(new PlgDef::ContentView::DefaultProjectView);
+
     this->service_RegisterPlugin(new Win::DefaultSingalView);
     this->service_RegisterPlugin(new MBar::DefaultMenuBar);
 }
@@ -718,6 +731,9 @@ PlgDef::I_PluginBase* PluginManager::operate_BuildChannel(const QString filepath
         };break;
     case PlgDef::UI_ContentView:{
             thisInstance = this->instance_GetContentView(win, plgname, upStream, *plglist->getArgsList());
+        };break;
+    case PlgDef::Service_ProjectManager:{
+            thisInstance = this->instance_GetProjectManager(plgname, upStream, *plglist->getArgsList());
         };break;
     }
 
@@ -857,7 +873,7 @@ PlgDef::TextModel::I_TextModel *Core::PluginManager::instance_GetTextModel(const
             i != cList->constEnd();
             ++i){
             if((*i)->registName() == factory_id){
-                return dynamic_cast<PlgDef::TextModel::I_TextModel *>(*cList->constBegin());
+                return dynamic_cast<PlgDef::TextModel::I_TextModel *>(*i);
             }
         }
     }
@@ -872,6 +888,35 @@ PlgDef::TextModel::I_TextModel *Core::PluginManager::instance_GetTextModel(const
     this->instance_RegisterPluginInstance(cflag, textm);
 
     return textm;
+}
+
+PlgDef::ProjectManager::I_ProjectManager *PluginManager::instance_GetProjectManager(const QString factory_id,
+                                                                                    PlgDef::I_PluginBase *upStream,
+                                                                                    QHash<QString, QString> xargs)
+{
+    auto cflag = this->channel_getChannelId(upStream);
+    auto cList = this->channel_GetExistsChannel(cflag);
+    if(cList != nullptr){
+        for(auto i=cList->constBegin();
+            i != cList->constEnd();
+            ++i){
+            if((*i)->registName() == factory_id){
+                return dynamic_cast<PlgDef::ProjectManager::I_ProjectManager *>(*i);
+            }
+        }
+    }
+
+    auto factory = this->factory_GetExistsFactory(factory_id);
+    if(factory == nullptr){
+        this->core->slot_Recieve_ProcessError(nullptr, "参数错误，索求插件未注册。id:" + factory_id);
+        exit(0);
+    }
+
+    auto pjtmgr = dynamic_cast<PlgDef::ProjectManager::I_ProjectManager *>(factory)
+            ->openExistProject(this->core, upStream, xargs);
+    this->instance_RegisterPluginInstance(cflag, pjtmgr);
+
+    return pjtmgr;
 }
 
 CView::I_ContentView *Core::PluginManager::instance_GetContentView(Win::I_Window * win,

@@ -20,6 +20,19 @@ DefaultTextModel::DefaultTextModel()
     }
 }
 
+const QString DefaultTextModel::registName() {
+    return "DefaultTextModel";
+}
+
+PlgDef::PluginType DefaultTextModel::upStreamMark(){
+    return PlgDef::IO_ChannelPreface;
+}
+
+QWidget *DefaultTextModel::reloadContentAndReturnSetupWidget()
+{
+    return nullptr;
+}
+
 QMenu *DefaultTextModel::getCustomMenu()
 {
     return nullptr;

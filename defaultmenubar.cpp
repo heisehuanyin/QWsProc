@@ -2,7 +2,8 @@
 
 using namespace PlgDef::MenuBar;
 
-DefaultMenuBar::DefaultMenuBar()
+DefaultMenuBar::DefaultMenuBar():
+    mbar(nullptr)
 {
 }
 
@@ -30,7 +31,8 @@ I_MenuBar *DefaultMenuBar::createNewMenubar(Core::WsCore *core, QString groupId)
 }
 
 QMenuBar *DefaultMenuBar::refreshMenuBarWidget(QList<QMenu *> vlist){
-    delete this->mbar;
+    if(this->mbar)
+        delete this->mbar;
     this->mbar = new QMenuBar;
 
     for(auto itor = vlist.constBegin();

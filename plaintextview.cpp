@@ -54,3 +54,8 @@ PlgDef::Window::I_Window *PlainTextView::getOwner()
 PlgDef::PluginType PlainTextView::upStreamMark() {
     return PlgDef::IO_TextModel;
 }
+
+QWidget *PlainTextView::reloadContentAndReturnSetupWidget()
+{
+    return nullptr;
+}

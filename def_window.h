@@ -1,5 +1,5 @@
-#ifndef DEFWINDOW_H
-#define DEFWINDOW_H
+#ifndef DEF_WINDOW_H
+#define DEF_WINDOW_H
 
 #include "def_contentview.h"
 #include "def_menubar.h"
