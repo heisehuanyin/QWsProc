@@ -28,51 +28,51 @@ CONFIG += c++11
 RC_ICONS = Victorinox.ico
 
 SOURCES += \
-    defaultconfigport.cpp \
-    defaultlogport.cpp \
-    defaulttextmodel.cpp \
-    main.cpp \
-    plaintextview.cpp \
-    singalview.cpp \
-    wscore.cpp \
-    def_configport.cpp \
+    customdialog.cpp \
     def_channelpreface.cpp \
+    def_configport.cpp \
     def_contentview.cpp \
     def_logport.cpp \
+    def_menubar.cpp \
     def_plugin_base.cpp \
+    def_projectmanager.cpp \
     def_textmodel.cpp \
     def_window.cpp \
-    pluginlistnode.cpp \
-    customdialog.cpp \
+    defaultconfigport.cpp \
+    defaultlogport.cpp \
     defaultmenubar.cpp \
-    def_menubar.cpp \
-    def_projectmanager.cpp \
-    wsnovelmanager.cpp \
+    defaulttextmodel.cpp \
+    main.cpp \
+    newfiledialog.cpp \
+    plaintextview.cpp \
+    pluginlistnode.cpp \
     projectview.cpp \
-    newfiledialog.cpp
+    singalview.cpp \
+    wscore.cpp \
+    wsnovelmanager.cpp
 
 HEADERS += \
+    customdialog.h \
     def_channelpreface.h \
     def_configport.h \
     def_contentview.h \
     def_logport.h \
     def_menubar.h \
     def_plugin_base.h \
+    def_projectmanager.h \
     def_textmodel.h \
     def_window.h \
     defaultconfigport.h \
     defaultlogport.h \
+    defaultmenubar.h \
     defaulttextmodel.h \
+    newfiledialog.h \
     plaintextview.h \
+    pluginlistnode.h \
+    projectview.h \
     singalview.h \
     wscore.h \
-    pluginlistnode.h \
-    customdialog.h \
-    defaultmenubar.h \
-    def_projectmanager.h \
-    wsnovelmanager.h \
-    projectview.h \
-    newfiledialog.h
+    wsnovelmanager.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -81,7 +81,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     CPP编程规范.md \
-    README.md
+    README.md \
+    Victorinox.ico
 
 FORMS +=
 
