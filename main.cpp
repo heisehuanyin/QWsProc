@@ -24,22 +24,13 @@ int main(int argc, char *argv[])
                              {"slience","path_to_script","不打开图形界面，使用静默模式运行指定脚本文件"}
                          });
 
-    std::vector<std::string> args;
-    for (auto i=0;i<argc;++i) {
-        args.push_back(argv[i]);
-    }
 
-    try {
-        parse.argsParse(args);
-    } catch (args_extra::ex_base *e) {
-        std::cout<< e->type() << ":" << e->description() << "." << std::endl;
-        return 0;
-    }
+    WsCore *app = new WsCore(&a);
+    app->openCoreService();
 
 
     // arguments parse and exec
-    WsCore *app = new WsCore(&a);
-    app->openCoreService();
+    args_extra::args_check_print(parse, argc, argv);
 
     std::string value, key = parse.peekOption({"help"}, value);
     if(key != ""){
