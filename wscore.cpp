@@ -172,7 +172,7 @@ void WsCore::service_RefreshComponents(PlgDef::Window::I_Window *win)
     //刷新Menubar
     MBar::I_MenuBar* mbar = this->manager->instance_GetMenuBarInstance(gid);
     auto bar = mbar->refreshMenuBarWidget(external);
-    win->service_ReplaceMenuBar(bar);
+    win->replaceMenuBar(bar);
 
     //刷新Toolsbar
 
@@ -272,14 +272,13 @@ PlgDef::ConfigPort::I_ConfigPort * WsCore::instance_GetMainConfigPort()
     return this->manager->instance_GetConfigport(this->DefaultConfigpath, xargs);
 }
 
-void WsCore::service_OpenSilentModel()
+void WsCore::openCoreService()
 {
     this->service_EnvironmentCheck();
 }
 
 void WsCore::service_OpenGraphicsModel(const QString groupId)
 {
-    this->service_OpenSilentModel();
     QString gid = groupId;
     if(groupId == QString())
         gid = Cfg::DefaultGraphicsGroupId;
@@ -397,7 +396,7 @@ void WsCore::slot_ViewChanges(QAction *act)
         ++itor){
         if((*itor)->pluginMark() == PlgDef::UI_ContentView){
             auto view = dynamic_cast<CView::I_ContentView*>(*itor);
-            view->getOwner()->bringViewToFront(view);
+            view->getOwner()->FocuseAt(view);
             this->service_RefreshComponents(aw);
             break;
         }
@@ -947,7 +946,7 @@ CView::I_ContentView *Core::PluginManager::instance_GetContentView(Win::I_Window
     this->instance_RegisterPluginInstance(cflag,view);
 
     if(win != nullptr)
-        win->placeView(cflag, view);
+        win->appendView(cflag, view);
 
     return view;
 }

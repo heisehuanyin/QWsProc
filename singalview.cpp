@@ -60,7 +60,7 @@ void DefaultSingalView::setTitle(const QString title)
     this->window->setWindowTitle(title + " - " + this->plgName);
 }
 
-void DefaultSingalView::placeView(const QString viewTitle, CView::I_ContentView *comp)
+void DefaultSingalView::appendView(const QString viewTitle, CView::I_ContentView *comp)
 {
     if(! this->list->contains(comp)){
         this->list->insert(comp, viewTitle);
@@ -77,7 +77,7 @@ void DefaultSingalView::removeView(PlgDef::ContentView::I_ContentView *cmop)
     }
 }
 
-void DefaultSingalView::bringViewToFront(PlgDef::ContentView::I_ContentView *comp)
+void DefaultSingalView::FocuseAt(PlgDef::ContentView::I_ContentView *comp)
 {
     if(this->list->contains(comp)){
         this->stack->setCurrentWidget(comp->getWidget());
@@ -85,7 +85,7 @@ void DefaultSingalView::bringViewToFront(PlgDef::ContentView::I_ContentView *com
     }
 }
 
-void DefaultSingalView::service_ReplaceMenuBar(QMenuBar *bar)
+void DefaultSingalView::replaceMenuBar(QMenuBar *bar)
 {
     this->window->setMenuBar(bar);
 }

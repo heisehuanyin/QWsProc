@@ -310,7 +310,7 @@ namespace Core {
         /**
          * @brief 打开静默模式，可以通过命令行和宏文件操纵软件
          */
-        void service_OpenSilentModel();
+        void openCoreService();
 
         /**
          * @brief 打开图形模式，所有操作可以通过图形界面进行操作，groupid默认值为QString()

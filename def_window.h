@@ -65,14 +65,14 @@ namespace PlgDef {
              * @brief 利用传入的MenuBar刷新本窗口的菜单栏及其组件
              * @param bar 菜单栏组件
              */
-            virtual void service_ReplaceMenuBar(QMenuBar *bar) = 0;
+            virtual void replaceMenuBar(QMenuBar *bar) = 0;
 
             /**
              * @brief 将ContentView放置在本窗体上
              * @param viewTitle 视图标题
              * @param comp 视图组件
              */
-            virtual void placeView(const QString viewTitle, ContentView::I_ContentView *comp) = 0;
+            virtual void appendView(const QString viewTitle, ContentView::I_ContentView *comp) = 0;
 
             /**
              * @brief 移除本窗体上的ContentView
@@ -84,7 +84,7 @@ namespace PlgDef {
              * @brief 设置指定窗体视图成员为封面视图，若制定项目非窗体视图成员，无响应
              * @param comp 指定视图成员
              */
-            virtual void bringViewToFront(ContentView::I_ContentView* comp)=0;
+            virtual void FocuseAt(ContentView::I_ContentView* comp)=0;
 
             /**
              * @brief 获取本窗口中的活动视图，也就是活动视图，当存在多个分隔区域的时候，返回每个区域的活动视图,基本被用作刷新菜单栏

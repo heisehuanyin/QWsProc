@@ -28,11 +28,11 @@ namespace PlgDef {
         public:
             virtual PlgDef::Window::I_Window *openNewWindow(Core::WsCore *core, const QString gid, int width, int height) override;
             virtual const QString getGroupID() override;
-            virtual void service_ReplaceMenuBar(QMenuBar *bar) override;
+            virtual void replaceMenuBar(QMenuBar *bar) override;
             virtual void setTitle(const QString title) override;
-            virtual void placeView(const QString viewTitle, PlgDef::ContentView::I_ContentView *comp) override;
+            virtual void appendView(const QString viewTitle, PlgDef::ContentView::I_ContentView *comp) override;
             virtual void removeView(ContentView::I_ContentView *cmop) override;
-            virtual void bringViewToFront(ContentView::I_ContentView *comp) override;
+            virtual void FocuseAt(ContentView::I_ContentView *comp) override;
             virtual QList<PlgDef::ContentView::I_ContentView *> getActivedView() override;
             virtual QList<ContentView::I_ContentView *> getAllView() override;
             virtual void setSize(int width, int height) override;
