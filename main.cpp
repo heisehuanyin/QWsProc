@@ -12,9 +12,9 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     WsCore *app = new WsCore(&a);
+    app->service_OpenSilentModel();
 
     if(argc == 2 && QString("-print") == argv[1]){
-        app->service_OpenSilentModel();
         auto m = app->service_getManager();
         std::cout<<"PlgDef::Feature_NoCombination === "<< PlgDef::Feature_NoCombination <<std::endl;
         std::cout<<"PlgDef::Feature_Combination   === "<< PlgDef::Feature_Combination   <<std::endl;
@@ -27,19 +27,16 @@ int main(int argc, char *argv[])
     }
 
     if(argc == 2 && QString("-test") == argv[1]){
-        app->service_OpenSilentModel();
         app->test_InnerTest();
         app->slot_SaveOperation();
 
         return 0;
     }
 
-
     app->service_OpenGraphicsModel("Default");
 
     if(argc > 2 && QString(argv[1]).indexOf('s') != -1){
-        app->operate_OpenFile(argv[2], nullptr,
-                app->service_getManager()->instance_GetWindowInstance("Default"));
+        app->operate_OpenFile(argv[2], nullptr, app->service_getManager()->instance_GetWindowInstance("Default"));
     }
 
     int rtnum = a.exec();

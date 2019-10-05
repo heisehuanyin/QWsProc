@@ -28,6 +28,7 @@ CONFIG += c++11
 RC_ICONS = Victorinox.ico
 
 SOURCES += \
+    args_parse.cpp \
     customdialog.cpp \
     def_channelpreface.cpp \
     def_configport.cpp \
@@ -52,6 +53,7 @@ SOURCES += \
     wsnovelmanager.cpp
 
 HEADERS += \
+    args_parse.h \
     customdialog.h \
     def_channelpreface.h \
     def_configport.h \
